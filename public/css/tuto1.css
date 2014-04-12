@@ -1,0 +1,56 @@
+
+[class*="span"] {
+ background-color:#FFFFFF;
+ margin-bottom: 20px;
+ border-radius: 5px 5px 5px 5px;
+ line-height: 80px;
+ text-align: center;
+}
+[class="navbar navbar-default" ] {
+background-color: black;
+}
+
+[class="span10"] {
+ background-color: green;
+}
+[class="span8"] {
+ background-color: white;
+}
+header {
+   height: 100px;
+}
+section {
+   height: 300px;
+}
+footer {
+   height: 50px;
+}
+.bloc {
+   height: 150px;
+}
+/* Les styles suivants sont juste pour faire apparaître la mise en page */
+.span12 {
+   background-color:#F2F7F7;
+}
+.span10 {
+   background-color:#F2F7F7;
+}
+.span9 {
+   background-color:#F2F7F7;
+}
+.span2 { /classe 
+   background-color:#F2F7F7;
+}
+body {
+   background-color:#F2F7F7;
+}
+#formulaire { //  id
+   background-color:#333333;
+   padding: 10px;
+}
+
+
+
+
+
+

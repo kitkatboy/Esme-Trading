@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html lang="fr"> <!-- Spécification du type de document et de la langue utiliser -->
+<head> 
+	<meta charset="utf-8" /><!-- encodage norme utf8-->
+	<!-- LES FICHIERS INCLUS -->
+	<link type="text/css" href="../css/bootstrap.css" rel="stylesheet">
+	<link type="text/css" href="../css/bootstrap.min.css" rel="stylesheet">
+	<link type="text/css" href="../css/bootstrap-theme.css" rel="stylesheet">
+	<link type="text/css" href="../css/bootstrap-theme.min.css" rel="stylesheet">
+	<link type="text/css" href="../css/tuto1.css" rel="stylesheet">
+	<script type="text/javascript" src="../js/bootstrap.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../js/client.js"></script>
+	<script type="text/javascript" src="../../js/principale.js"></script>
+	
+</head>
+ 
+<body>
+	<div class="container-fluid"><!--  Classe qui contiens notre site et qui s’adapte à la largeur de l’écran -->
+	
+		<!-- première ligne : logo  --> 
+		<div class="col-xs-12">
+			<div class="row-fluid thumbnail"><img src="../images/logo2.png" alt="Logo"></div>
+		</div>
+		
+		<!-- 2ième ligne  barre de navigation --> 
+		<div class="col-xs-12">
+			<nav class="navbar navbar-default" role="navigation">	
+				<div class="navbar-header">
+					<a class="post1 navbar-brand" href="#">Deconnexion</a>
+				</div>
+				
+				<div class="collapse navbar-collapse navbar-ex1-collapse">
+					<ul class="nav navbar-nav">
+						<li><a href="#">Portefeuille</a></li>
+						<li><a href="#">Suggestions</a></li>
+					</ul>
+
+					<ul class="nav navbar-nav navbar-right">
+						<form class="navbar-form navbar-left" role="search">
+							<div class="form-group">
+								<input type="text" class="form-control" placeholder="Search">
+							</div>
+							<button type="submit" class="btn btn-default">Rechercher</button>
+						</form>
+					</ul>
+				</div>				
+			</nav>
+		</div>
+		
+		<!-- fin test bare navigation>
+
+
+		<!-- 3ime ligne connection  -->    
+		<ul class="thumbnails">  
+			<div class="row-fluid">
+  
+				<!-- Première colonne--> 
+				<li class="col-md-4">
+					<div class="thumbnail"><img src="../images/imag1.jpg" alt="Tigre"></div>
+				</li>
+     
+				<!-- 2ime colonne  --> 
+				<li class="col-md-4">
+					<div class="thumbnail"><img src="../images/imag2.jpg" alt="Tigre"></div>
+				</li>
+				
+				<!-- 3ime colone  --> 
+				<li class="col-md-4">
+					<!--<div class="thumbnail">-->
+						<!-- le style Du script qui recupere les articles  -->
+						<style type='text/css'>  
+							#results{ width: 100%; margin-left: 0%; border: 1px solid gray; padding: 5px; height: 700px; overflow: auto; }   
+						</style>   
+						<!-- ici commance mon script qui fait appel au web service YLQ pour récuperer les new stories-->
+						<!--<script type='text/javascript'>  
+							// Parses returned response and extracts  
+							// title, Liens , text de chaque news story.  
+							function top_stories(o){  
+								var items = o.query.results.item;  
+								var output = '';
+								var no_items=items.length;  
+								for(var i=0;i<no_items;i++){  
+									var title = items[i].title;  
+									var link = items[i].link;  
+									var desc = items[i].description;
+									output += "<h3><a href='" + link + "'>"+title+"</a></h3>" + desc + "<hr/>";  
+								}  
+								// Placer les news stories dans div tag  
+								document.getElementById('results').innerHTML = output;
+							}	-->
+							<!-- ici se fini mon script-->
+						<!-- </script>  --> 
+						<!-- page web vide pour le moment >
+						<!-- Div tag pour les stories results -->  
+						<div id='results'></div>  
+						<!-- <script src='http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%3D%22http%3A%2F%2Frss.news.yahoo.com%2Frss%2Ftopstories%22&format=json&callback=top_stories'>
+						</script> -->
+					<!--</div>-->
+				</li> 
+			</div>
+		</ul>
+	</div>
+</body>
+
+<!-- les scripts en cours de changement-->
+<!--<script src="bootstrap/js/jquery.js"></script>-->
+<!--<script src="bootstrap/bootstrap/js/bootstrap-carousel.js"></script>-->
+<!--<script src="bootstrap/bootstrap/js/bootstrap-transition.js"></script>-->
+
+</html>
