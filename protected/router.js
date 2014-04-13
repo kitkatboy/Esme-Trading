@@ -24,7 +24,7 @@ constructeur = function (req, resp) {
 		this.pathname = ""; // Variable contenant le chemin d'accès, retravaillée pour en extraire le type de fichier
 		this.filetype = "";
 		this.path = ""; // Contient le chemin d'accès
-		this.image_file = "jpg png jpeg bmp gif"; // Contient ttes les extensions d'images prisent en charge
+		this.image_file = "jpg png jpeg bmp gif ico"; // Contient ttes les extensions d'images prisent en charge
 		//this.var_test == false;
 		util.log("Traitement de l\'url de l'objet \'requete\' : " + util.inspect(req.url));
 	} else {
