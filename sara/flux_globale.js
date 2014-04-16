@@ -29,7 +29,8 @@ var recuperation=function(){
 					b = JSON.parse(b);
 					evnts.emit("save", b);
 					});
-					r.on("error", function() { 
+					r.on("error", function(e) { 
+						util.log("ERROR - Data transfert HTTPS : " + e);
 					});
 				}
 			});
@@ -64,11 +65,11 @@ evnts.emit('creation_serveur');
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 setInterval(function (){ 
 	recuperation();
-	globale.i++;	
+	//globale.i++;	
 },10000);	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-reponse(that, fonc){
+/*reponse(that, fonc){
 fs.exists('tmpFile', function(exist){															
 	if(exist)	// si le fichier n'existe pas on passe a l'entreprise suivante 					
 		{
@@ -76,5 +77,5 @@ fs.exists('tmpFile', function(exist){
 		}
 });
 });			
-
+*/
 			
