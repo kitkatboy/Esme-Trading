@@ -15,7 +15,7 @@ server.i=0; // compteur d'entreprise
 server.jour=0;
 server.heure=-1;
 server.requettes=-1; // nombre de requette pour recuperer les données courantes 
- if(server.Mois.length == 1); {
+ if(server.Mois.length == 1) {
         server.Mois = '0' + server.Mois;
 		 
     }
@@ -184,10 +184,13 @@ emetteur.on('recuperation', function(){
 
 emetteur.on('debut',function(){
 server.Today= new Date;
-if(server.Today.getHours()>8 && server.Today.getHours()<19 && server.Today.getDay()!=6 && server.Today.getDay()!=0) // heure de démarrage de la bourse 9 H
+if(server.Today.getHours()>8 && server.Today.getHours()<18 && server.Today.getDay()!=6 && server.Today.getDay()!=0) // heure de démarrage de la bourse 9 H
 	{
 			emetteur.emit('rafraichissement'); // lancement de la recuperation des chiffres du cac 40 toute les 5 min 
 			server.heure++;
+	}else if(server.Today.getHours()==19 && server.Today.getMinutes()>0 && server.Today.getMinutes()<6 )
+	{
+		server.jour++;
 	}
 	else{
 		util.log(server.Today.getHours()+"h"+server.Today.getMinutes()+"min");
@@ -199,4 +202,6 @@ setInterval(function (){
 	emetteur.emit("debut");
 	},30000);
 
+	
+	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
