@@ -13,7 +13,7 @@ server.f = 0;
 server.fe = 0;
 server.articles = [];
 server.base = [];
-output = {};
+output = "";
 
 server.readarticle = function(titre,entreprise){
 	//console.log("Ici --------------------");
@@ -28,7 +28,7 @@ server.readarticle = function(titre,entreprise){
 				//server.fe --;
 				var article = JSON.parse(d);		
 				//util.log("fin article charge: " + server.fe+titre);
-				article.note = 0;
+				//article.note = 0;
 				
 				ev.emit("ecris",article,entreprise);
 				//util.log("8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"+server.fe);
@@ -69,25 +69,39 @@ server.readbase = function(rc,entreprise){
 };
 
 server.mef = function(article,entreprise){
-	//console.log("La fin ------------------------------->>>>>>>>>>>");
-	server.articles[server.articles.length] = article;//------------------------------------------------------
-	//console.log(">>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<< " + server.fe);
+	server.articles[server.articles.length] = article;
 	
 	if(!--server.fe){
 		util.log("ok");
+		var color = "";
+		var image = "";
 		
-		output[entreprise] = "";//---------------------------------------------------------------------
-		//util.log("8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888");
 		for(i in server.articles){
-			if(server.articles[i].image){
-				output[entreprise] += "<div class=\"span1\"><img src="+server.articles[i].image.url+" class=\"img-thumbnail\"></div><div><h5><a href='"+server.articles[i].lien+"'>"+server.articles[i].titre+"</a></h5><br/><h6>"+server.articles[i].description+"</h6></div><hr/>";
+			if (server.articles[i].note >= 1) {
+				color = " success";
+			} else if (server.articles[i].note <= (-1)) {
+				color = " danger";
+			} else {
+				color = "";
 			}
-			else{
-				output[entreprise] += "<h3><a href='"+server.articles[i].lien+"'>"+server.articles[i].titre+"</a></h3>"+server.articles[i].description+"<hr/>";
+			
+			if (server.articles[i].image) {
+				image = server.articles[i].image.url;
+			} else if (!(server.articles[i].image)) {
+				image = "../images/NotFound.jpg";
 			}
+			
+			output += '<tr class="accordion-toggle '+color+'" data-toggle="collapse" data-target="#collapse'+i+'">'+
+					  ' <td style="width:80px"><img src="'+image+'" width=50 height=50></td>'+
+					  ' <td><span class="text-left"><style type="text/css">a:link{text-decoration:none}</style><small><font color="blue">'+server.articles[i].titre+'</small></font></span></td>'+
+					  '</tr>'+
+					  '<td colspan="6" class="hiddenRow  active">'+
+					  ' <div class="accordian-body collapse container-fluid" id="collapse'+i+'">'+
+					  '  <small>'+server.articles[i].description+'<a href="'+server.articles[i].lien+'" target="_blank"> Lire l\'article</a></small>'+
+					  ' </div>'+
+					  '</td>';
 		}
-		//console.log("------------------------" + JSON.stringify(output[entreprise]));
-		server.that[server.fonc](JSON.stringify(output[entreprise]));		
+		server.that[server.fonc](output);
 	}
 };
 server.sortie = function(entreprise){

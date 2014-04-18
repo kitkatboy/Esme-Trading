@@ -38,10 +38,15 @@ pri.load_art = function() {
 
 pri.load_articles_back = function () {
 	if (this.readyState == 4 && this.status == 200) {
+		//alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
 		if (r.resp) {
+			//alert("this : " + r.resp);
+			//r.resp = (r.resp).replace("\'", "\"");
 			// Placer les nouveaux articles dans div tag
-			document.getElementById('results').innerHTML = r.resp/*.sunstring(1)*/;
+			//r.resp = (r.resp).substring(1, (r.resp).length - 1);
+			document.getElementById('articles').innerHTML = r.resp;
+			
 		} else {
 			alert("Les articles n'ont pas pu être rafraichis");
 		}
@@ -51,3 +56,5 @@ pri.load_articles_back = function () {
 window.onload = function () {
     setTimeout(pri.init, 1);
 };
+
+$("#articles").html();

@@ -17,8 +17,9 @@ client.post = function (data, callback) {
 HTMLElement.prototype.has_class = function (c) {
 	/* 
 	* .indexOf() -> Retourne la position de l'argument (à partir de quel caractère il se trouve dans la chaîne) 
-	* Retourne -1 si l'argument (ici filetype) n'est pas dans la chaîne testé (ici image_file)
+	* Retourne -1 si l'argument n'est pas dans la chaîne testée
 	*/
     return (this.className.indexOf(c) >= 0);
 };
 
+/* Scripts pour animations Jquerry */

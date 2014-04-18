@@ -9,13 +9,16 @@ acc.init = function () {
 acc.on_click = function (ev) {
 	// .target désigne la cible(le noeud DOM) concerné par le chang. d'état sur événement "click" (ici balises <div>)
     var src = ev.target; 
+	//alert("click : " + ev.target);
     if (src.has_class("post1")) {
-        //alert("Evenement \'click\' post1");
+        //alert("C'est là : " + src);
         acc.send_post1();
     } else if (src.has_class("post2")) {
         //alert("Evenement \'click\' post2");
         acc.send_post2();
-    }
+    }/* else {
+		alert("Pas passé : " + src);
+	}*/
 };
 
 acc.send_post1 = function() {
