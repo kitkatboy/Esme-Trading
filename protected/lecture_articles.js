@@ -6,7 +6,6 @@ var sqlite3 = require("sqlite3").verbose();
 var db = new sqlite3.Database("../protected/basearticle.db");
 
 var server = {};
-server.dicoapp = {};
 server.base = [];
 server.f = 0;
 server.fe = 0;
@@ -18,15 +17,15 @@ server.readbase = function(entreprise) {
 	var i = 0;
 	if(entreprise == "all"){
 		var stmt = "SELECT * FROM basearticle";
-	}
-	else{
-		var stmt = "SELECT entreprise FROM basearticle WHERE entreprise = \'" + entreprise + "\'";
+	} else {
+		var stmt = "SELECT * FROM basearticle WHERE entreprise = \'" + entreprise + "\'";
 	}
     db.each(stmt, function (e, r) {
 		if (e) {
 			util.log(e);
 		} else {
 			server.fe ++;
+			util.log("------------------------ Chargement fe : " + server.fe);//------------------------------------------
 			ev.emit("charge", r.titre);
 			server.base[i] = r;
 			i++;
@@ -41,15 +40,17 @@ server.readarticle = function(titre) {
 		fs.readFile("../protected/articlesfr/"+titre.substring(1)+".txt","UTF-8", function (e,d){
 			if (e) {
 				server.fe --;
+				util.log("------------------------ Erreur Lecture fe : " + server.fe);//------------------------------------------
 				util.log(e);
-			} else {
+			} else if (server.fe > 0) {
 				var article = JSON.parse(d);
-				
+				util.log("------------------------ Lecture fe : " + server.fe);//------------------------------------------
 				ev.emit("ecris", article);
 			}
 		});
 	}else{
 		server.fe --;
+		util.log("------------------------ Existe pas fe : " + server.fe);//------------------------------------------
 		util.log("INFO : Article sans titre");
 	}
 };
@@ -58,7 +59,7 @@ server.envoi = function(article){
 	var color;
 	var image;
 	server.articles[server.articles.length] = article;
-	
+	//util.log("----------------------- Avant : " + server.articles.length);
 	if(!--server.fe){
 		for(i in server.articles){
 			if (server.articles[i].note >= 1) {
@@ -85,6 +86,17 @@ server.envoi = function(article){
 							 ' </div>'+
 							 '</td>';
 		}
+		/*
+		server.articles.length = 0;
+		server.fe = 0;
+		util.log("-----------------------Apres : " + server.articles.length);
+		
+		server.base.length = 0;
+		server.f = 0;
+		server.fe = 0;
+		server.articles.length = 0;
+		server.output = "";
+		*/
 		server.that[server.fonc](server.output);
 	}
 };
