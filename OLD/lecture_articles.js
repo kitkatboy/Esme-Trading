@@ -1,4 +1,5 @@
 var util = require("util");
+var http = require('http');
 var fs = require("fs");
 var events = require("events");
 var ev = new events.EventEmitter();
@@ -11,23 +12,41 @@ server.base = [];
 server.f = 0;
 server.fe = 0;
 server.articles = [];
+server.base = [];
 server.output = "";
 
-server.readbase = function(entreprise) {
+server.readarticle = function(titre,entreprise) {
+	if (titre) {
+		fs.readFile("../protected/articlesfr/"+titre.substring(1)+".txt","UTF-8", function (e,d){
+			if (e) {
+				server.fe --;
+			} else {
+				var article = JSON.parse(d);
+				
+				ev.emit("ecris",article,entreprise);
+			}
+		});
+	}else{
+		server.fe --;
+	}
+};
+
+
+server.readbase = function(rc,entreprise){
 	server.f ++;
 	var i = 0;
-	if(entreprise == "all"){
+	if(rc == "all"){
 		var stmt = "SELECT * FROM basearticle";
 	}
 	else{
-		var stmt = "SELECT entreprise FROM basearticle WHERE entreprise = \'" + entreprise + "\'";
+		var stmt = "SELECT entreprise FROM basearticle WHERE entreprise = \'" + rc  + "\'";
 	}
     db.each(stmt, function (e, r) {
 		if (e) {
 			util.log(e);
 		} else {
 			server.fe ++;
-			ev.emit("charge", r.titre);
+			ev.emit("charge",r.titre,entreprise);
 			server.base[i] = r;
 			i++;
 			
@@ -36,30 +55,14 @@ server.readbase = function(entreprise) {
     });
 };
 
-server.readarticle = function(titre) {
-	if (titre) {
-		fs.readFile("../protected/articlesfr/"+titre.substring(1)+".txt","UTF-8", function (e,d){
-			if (e) {
-				server.fe --;
-				util.log(e);
-			} else {
-				var article = JSON.parse(d);
-				
-				ev.emit("ecris", article);
-			}
-		});
-	}else{
-		server.fe --;
-		util.log("INFO : Article sans titre");
-	}
-};
-
-server.envoi = function(article){
-	var color;
-	var image;
+server.mef = function(article,entreprise){
 	server.articles[server.articles.length] = article;
 	
 	if(!--server.fe){
+		util.log("ok");
+		var color = "";
+		var image = "";
+		
 		for(i in server.articles){
 			if (server.articles[i].note >= 1) {
 				color = " success";
@@ -81,7 +84,7 @@ server.envoi = function(article){
 							 '</tr>'+
 							 '<td colspan="6" class="hiddenRow  active">'+
 							 ' <div class="accordian-body collapse container-fluid" id="collapse'+i+'">'+
-							 '  <small><font color="#AAA">'+(server.articles[i].date).substring(0,10)+'</font><br/>'+server.articles[i].description+'<a href="'+server.articles[i].lien+'" target="_blank"> Lire l\'article</a></small>'+
+							 '  <small>'+server.articles[i].description+'<a href="'+server.articles[i].lien+'" target="_blank"> Lire l\'article</a></small>'+
 							 ' </div>'+
 							 '</td>';
 		}
@@ -89,20 +92,26 @@ server.envoi = function(article){
 	}
 };
 
-exports.start = function(that, fonc, search){
+server.sortie = function(entreprise){
+	server.that[server.fonc](server.output);
+};
+
+exports.start = function(that,fonc){
+	var entreprise = "all";
 	server.fonc = fonc;
 	server.that = that;
-	var entreprise;
 	
-	if (search) {
-		entreprise = search;
-	} else {
-		entreprise = "all";
-	}
-	
-	ev.on("ecris",server.envoi);
+	ev.on("ecris",server.mef);
 	ev.on("charge",server.readarticle);
 	
-	server.readbase(entreprise);
+	util.log("ok");
+	
+	if (server.output[entreprise]) {
+		server.sortie(entreprise);
+	} else {
+		server.readbase(entreprise);
+	}
+	
+	util.log("ok");	
 };
 

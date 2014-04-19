@@ -8,6 +8,8 @@
 	<link type="text/css" href="../css/tuto1.css" rel="stylesheet">
 	<script type="text/javascript" src="../js/jquery-1.11.0.js"></script>
 	<script type="text/javascript" src="../js/bootstrap.js"></script>
+	<script type="text/javascript" src="../js/highcharts.js"></script>
+	<script type="text/javascript" src="../js/exporting.js"></script>
 	<script type="text/javascript" src="../js/client.js"></script>
 	<script type="text/javascript" src="../../js/principale.js"></script>
 	
@@ -25,7 +27,7 @@
 		<div class="col-xs-12">
 			<nav class="navbar navbar-inverse" role="navigation">	
 				<div class="navbar-header">
-					<a class="post1 navbar-brand" href="#">Deconnexion</a>
+					<a class="post1 navbar-brand" href="#" title="Quitter la session">Deconnexion</a>
 				</div>
 				<div></div>
 				
@@ -47,14 +49,57 @@
 			</nav>
 		</div>
 		
+		<!-- 3ème ligne : intelligence  -->
 		
+		<!-- 1ère colonne : entreprises  -->
+		<div class="col-xs-2">
+			<div class="panel">
+				<div class="panel-heading">
+					<h4 class="panel-titleBlack1">
+						<span>Entreprise</span>
+					</h4>
+				</div>
+				<div class="panel-body2">
+				
+				</div>
+			</div>
+		</div
+		
+		<!-- 2ème colonne : Courbes et portefeuille  -->
+		<div class="col-xs-6">
+				
+			<!-- 1ère ligne : portefeuille -->
+			<div class="panel">
+				<div class="panel-heading">
+					<h4 class="panel-titleBlack1">
+						<span>Portefeuille</span>
+					</h4>
+				</div>
+				<div class="panel-body2">
+				
+				</div>
+			</div>
+			
+			<!-- 2ème ligne : courbe -->
+			<div class="panel" onmouseover="this.style.cursor='pointer'">
+				<div class="panel-heading" title="Rafraichir">
+					<h4 class="panel-titleBlack2">
+						<span>Cours de bourse</span>
+						<span class="glyphicon glyphicon-repeat pull-right"><style type="text/css">a:link{text-decoration:none}</style></span>
+					</h4>
+				</div>
+				<div class="panel-body3">
+				<div id="courbe" style="min-width: 310px; height: 300px; margin: 0 auto"></div>
+				</div>
+			</div>
+		</div>
 
-		<!-- 3ème ligne : intelligence  -->    
-		<div class="col-xs-4 col-xs-offset-8">
+		<!-- 3ème colonne : articles  -->    
+		<div class="col-xs-4">
 			<div class="panel" onmouseover="this.style.cursor='pointer'">
 				<div class="panel-heading" title="Rafraichir" onclick="pri.load_art()">
-					<h4 class="panel-title">
-						<span onmouseover="this.style.cursor='default'">Actualité</span>
+					<h4 class="panel-titleBlack2">
+						<span>Actualité</span>
 						<span class="glyphicon glyphicon-repeat pull-right"><style type="text/css">a:link{text-decoration:none}</style></span>
 					</h4>
 				</div>

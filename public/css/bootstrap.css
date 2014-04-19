@@ -4768,12 +4768,19 @@ a.list-group-item-danger.active:focus {
   margin-bottom: 1px;
   height: 500px;
   overflow: auto;
+  border-radius: 4px;
 }
 /*--------------------------------------Modifiée----------------------------------*/
 .panel-body2 {
   padding: 1px;
   margin-bottom: -19px;
 }
+/*--------------------------------------Modifiée----------------------------------*/
+.panel-body3 {
+  padding: 1px;
+  margin-right: 1px;
+  height: 302px;
+ }
 .panel-heading {
   padding: 10px 15px;
   border-bottom: 1px solid transparent;
@@ -4783,18 +4790,37 @@ a.list-group-item-danger.active:focus {
 .panel-heading > .dropdown .dropdown-toggle {
   color: inherit;
 }
-.panel-title {
+/*---------------------------------------Crée----------------------------------*/
+.panel-titleBlack1 {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 16px;
+  color: #999;
+  cursor:default;
+}
+/*---------------------------------------Crée----------------------------------*/
+.panel-titleBlack1 > a {
+  color: inherit;
+}
+/*---------------------------------------Crée----------------------------------*/
+.panel-titleBlack2 {
   margin-top: 0;
   margin-bottom: 0;
   font-size: 16px;
   color: #999;
 }
-.panel-title > a {
+/*---------------------------------------Crée----------------------------------*/
+.panel-titleBlack2 > a {
   color: inherit;
 }
 /*---------------------------- Crée ------------------------------------------*/
-.panel .panel-title:hover,
-.panel .panel-title:focus {
+.panel .panel-titleBlack1:hover,
+.panel .panel-titleBlack1:focus {
+  text-decoration: none;
+ }
+ /*---------------------------------------Crée----------------------------------*/
+.panel .panel-titleBlack2:hover,
+.panel .panel-titleBlack2:focus {
   color: #fff;
   background-color: transparent;
   text-decoration: none;
@@ -5799,6 +5825,7 @@ button.close {
     display: none !important;
   }
 }
+/*---------------------------------------------------Ajoutée : disparition cases tableau-------------------------*/
 .hiddenRow {
 	padding: 0 !important;
 }
