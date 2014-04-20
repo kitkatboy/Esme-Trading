@@ -13,6 +13,7 @@
 	<script type="text/javascript" src="../js/client.js"></script>
 	<script type="text/javascript" src="../../js/principale.js"></script>
 	
+	<title>Esme Trading</title>
 </head>
  
 <body>
@@ -33,8 +34,9 @@
 				
 				<div class="collapse navbar-collapse navbar-ex1-collapse">
 					<ul class="nav navbar-nav">
-						<li><a href="#" title="Gérez votre argent">Portefeuille</a></li>
-						<li><a href="#" title="Voir les suggestions">Investissez</a></li>
+						<li><a href="#" title="Voir vos comptes">Portefeuille</a></li>
+						<li><a href="#" title="Placez votre argent">Investissez</a></li>
+						<li><a href="#" title="Afficher les propositions">Suggestions</a></li>
 					</ul>
 
 					<ul class="nav navbar-nav navbar-right">
@@ -42,7 +44,7 @@
 							<div class="form-group">
 								<input type="text" class="form-control" placeholder="Search">
 							</div>
-							<button type="submit" class="btn btn-default">Rechercher</button>
+							<button class="btn btn-default" onclick="return false;">Rechercher</button>
 						</form>
 					</ul>
 				</div>				
@@ -56,11 +58,15 @@
 			<div class="panel">
 				<div class="panel-heading">
 					<h4 class="panel-titleBlack1">
-						<span>Entreprise</span>
+						<span>Entreprises</span>
 					</h4>
 				</div>
 				<div class="panel-body2">
-				
+					<a href="#"><small><font color="Tomato">Une mauvaise entreprise</font></small></a><br/>
+					<a href="#"><small><font color="SteelBlue">Une entreprise neutre</font></small></a><br/>
+					<a href="#"><small><font color="SteelBlue">Et une autre</font></small></a><br/>
+					<a href="#"><small><font color="SteelBlue">Encore une</font></small></a><br/>
+					<a href="#"><small><font color="MediumSeaGreen">Une bonne entreprise</font></small></a><br/>
 				</div>
 			</div>
 		</div
@@ -75,7 +81,7 @@
 						<span>Portefeuille</span>
 					</h4>
 				</div>
-				<div class="panel-body2">
+				<div class="panel-body4">
 				
 				</div>
 			</div>
@@ -84,12 +90,22 @@
 			<div class="panel" onmouseover="this.style.cursor='pointer'">
 				<div class="panel-heading" title="Rafraichir">
 					<h4 class="panel-titleBlack2">
-						<span>Cours de bourse</span>
+						<span>Cac 40</span>
 						<span class="glyphicon glyphicon-repeat pull-right"><style type="text/css">a:link{text-decoration:none}</style></span>
 					</h4>
 				</div>
-				<div class="panel-body3">
-				<div id="courbe" style="min-width: 310px; height: 300px; margin: 0 auto"></div>
+				<div class="panel-body3" onmouseover="this.style.cursor='default'">
+					<div class="col-xs-8" id="courbe" style="min-width: 310px; height: 300px; margin: 0 auto"></div>
+					<div class="col-xs-4">
+						<hr/>
+						<strong><big>Cours<span class="pull-right">4431.81</span></big></strong><br/><br/>
+						<strong><big>Variation<span class="pull-right"><font color="green">+0.59%</font></span></big></strong><br/>
+						<hr/><br/>
+						<big>Ouverture<span class="pull-right">4412.41</span></big><br/>
+						<big>+ HAUT<span class="pull-right"><font color="MediumSeaGreen">4432.64</font></span></big><br/>
+						<big>+ BAS<span class="pull-right"><font color="Tomato">4392.06</font></span></big><br/>
+						<big>Clôture préc.<span class="pull-right">4405.66</span></big>
+					</div>
 				</div>
 			</div>
 		</div>

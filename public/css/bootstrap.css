@@ -4772,15 +4772,30 @@ a.list-group-item-danger.active:focus {
 }
 /*--------------------------------------Modifiée----------------------------------*/
 .panel-body2 {
-  padding: 1px;
-  margin-bottom: -19px;
+  padding: 15px;
+  margin-left: 1px;
+  margin-right: 1px;
+  margin-bottom: 1px;
+  background-color: transparent;
+  border-radius: 2px;
 }
 /*--------------------------------------Modifiée----------------------------------*/
 .panel-body3 {
-  padding: 1px;
-  margin-right: 1px;
-  height: 302px;
+  padding: 5px;
+  margin-right: 10px;
+  margin-left: -19px;
+  height: 306px;
+  color: #fff;
  }
+ /*--------------------------------------Modifiée----------------------------------*/
+.panel-body4 {
+  padding: 15px;
+  margin-left: 1px;
+  margin-right: 1px;
+  margin-bottom: 1px;
+  background-color: #fff;
+  border-radius: 2px;
+}
 .panel-heading {
   padding: 10px 15px;
   border-bottom: 1px solid transparent;
@@ -4793,7 +4808,7 @@ a.list-group-item-danger.active:focus {
 /*---------------------------------------Crée----------------------------------*/
 .panel-titleBlack1 {
   margin-top: 0;
-  margin-bottom: 0;
+  margin-bottom: 1px;
   font-size: 16px;
   color: #999;
   cursor:default;

@@ -42,7 +42,7 @@ server.readarticle = function(titre) {
 				server.fe --;
 				util.log("------------------------ Erreur Lecture fe : " + server.fe);//------------------------------------------
 				util.log(e);
-			} else if (server.fe > 0) {
+			} else {
 				var article = JSON.parse(d);
 				util.log("------------------------ Lecture fe : " + server.fe);//------------------------------------------
 				ev.emit("ecris", article);
@@ -59,7 +59,6 @@ server.envoi = function(article){
 	var color;
 	var image;
 	server.articles[server.articles.length] = article;
-	//util.log("----------------------- Avant : " + server.articles.length);
 	if(!--server.fe){
 		for(i in server.articles){
 			if (server.articles[i].note >= 1) {
@@ -78,25 +77,14 @@ server.envoi = function(article){
 			
 			server.output += '<tr class="accordion-toggle '+color+'" data-toggle="collapse" data-target="#collapse'+i+'">'+
 							 ' <td style="width:80px"><img src="'+image+'" width=50 height=50></td>'+
-							 ' <td><span class="text-left"><small><font color="blue">'+server.articles[i].titre+'</small></font></span></td>'+
+							 ' <td><span class="text-left"><small><font color="MediumBlue">'+server.articles[i].titre+'</small></font></span></td>'+
 							 '</tr>'+
 							 '<td colspan="6" class="hiddenRow  active">'+
 							 ' <div class="accordian-body collapse container-fluid" id="collapse'+i+'">'+
-							 '  <small><font color="#AAA">'+(server.articles[i].date).substring(0,10)+'</font><br/>'+server.articles[i].description+'<a href="'+server.articles[i].lien+'" target="_blank"> Lire l\'article</a></small>'+
+							 '  <small><font color="#AAA">'+(server.articles[i].date).substring(0,10)+'</font><br/>'+server.articles[i].description+'<a href="'+server.articles[i].lien+'" target="_blank"><font color="Orchid"> Lire l\'article</font></a></small>'+
 							 ' </div>'+
 							 '</td>';
 		}
-		/*
-		server.articles.length = 0;
-		server.fe = 0;
-		util.log("-----------------------Apres : " + server.articles.length);
-		
-		server.base.length = 0;
-		server.f = 0;
-		server.fe = 0;
-		server.articles.length = 0;
-		server.output = "";
-		*/
 		server.that[server.fonc](server.output);
 	}
 };
