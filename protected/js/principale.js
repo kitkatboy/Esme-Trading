@@ -62,23 +62,23 @@ $(function () {
 			spacingRight: 20
 		},
 		title: {
-			text: 'USD to EUR exchange rate from 2006 through 2008'
+			text: 'Cac 40'
 		},
 		subtitle: {
 			text: document.ontouchstart === undefined ?
-				'Click and drag in the plot area to zoom in' :
-				'Pinch the chart to zoom in'
+				'Cliquez et glissez pour zoomer' :
+				'Pincez pour zoomer'
 		},
 		xAxis: {
 			type: 'datetime',
-			maxZoom: 14 * 24 * 3600000, // fourteen days
+			maxZoom: 5 * 60 * 1000, // cinq minutes
 			title: {
 				text: null
 			}
 		},
 		yAxis: {
 			title: {
-				text: 'Exchange rate'
+				text: 'Cours'
 			}
 		},
 		tooltip: {
@@ -112,9 +112,9 @@ $(function () {
 
 		series: [{
 			type: 'area',
-			name: 'USD to EUR',
-			pointInterval: 24 * 3600 * 1000,
-			pointStart: Date.UTC(2006, 0, 01),
+			name: 'Cours',
+			pointInterval: 5 * 60 * 1000,
+			pointStart: Date.UTC(2014, 0, 01),
 			data: [
 				0.8446, 0.8445, 0.8444, 0.8451,    0.8418, 0.8264,    0.8258, 0.8232,    0.8233, 0.8258,
 				0.8283, 0.8278, 0.8256, 0.8292,    0.8239, 0.8239,    0.8245, 0.8265,    0.8261, 0.8269,

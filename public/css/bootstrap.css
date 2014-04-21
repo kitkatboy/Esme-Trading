@@ -1467,9 +1467,10 @@ th {
 .table-striped > tbody > tr:nth-child(odd) > th {
   background-color: #f9f9f9;
 }
+/*-------------------------------------------------Modifiée---------------------------------*/
 .table-hover > tbody > tr:hover > td,
 .table-hover > tbody > tr:hover > th {
-  background-color: #f5f5f5;
+  /*background-color: #f5f5f5;*/
 }
 table col[class*="col-"] {
   position: static;
@@ -1482,6 +1483,7 @@ table th[class*="col-"] {
   display: table-cell;
   float: none;
 }
+/*-------------------------------------Modifiée-------------------------------*/
 .table > thead > tr > td.active,
 .table > tbody > tr > td.active,
 .table > tfoot > tr > td.active,
@@ -1494,13 +1496,14 @@ table th[class*="col-"] {
 .table > thead > tr.active > th,
 .table > tbody > tr.active > th,
 .table > tfoot > tr.active > th {
-  background-color: #f5f5f5;
+  background-color: #fff;
 }
+/*-------------------------------------------Modifiée------------------------------*/
 .table-hover > tbody > tr > td.active:hover,
 .table-hover > tbody > tr > th.active:hover,
 .table-hover > tbody > tr.active:hover > td,
 .table-hover > tbody > tr.active:hover > th {
-  background-color: #e8e8e8;
+  background-color: #f5f5f5;
 }
 .table > thead > tr > td.success,
 .table > tbody > tr > td.success,

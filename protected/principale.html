@@ -74,15 +74,17 @@
 		<!-- 2ème colonne : Courbes et portefeuille  -->
 		<div class="col-xs-6">
 				
-			<!-- 1ère ligne : portefeuille -->
+			<!-- 1ère ligne : suggestions, portefeuille, achat d'actions -->
 			<div class="panel">
 				<div class="panel-heading">
 					<h4 class="panel-titleBlack1">
-						<span>Portefeuille</span>
+						<span>Suggestions</span>
 					</h4>
 				</div>
 				<div class="panel-body4">
-				
+					<p><font color="green">Telle société : </font>Investissez dans cette société.</p>
+					<p><font color="red">Une autre société : </font>Vendez vos actions de cette société.</p>
+					<p style="margin-top:-10px"></p>
 				</div>
 			</div>
 			
@@ -90,16 +92,18 @@
 			<div class="panel" onmouseover="this.style.cursor='pointer'">
 				<div class="panel-heading" title="Rafraichir">
 					<h4 class="panel-titleBlack2">
-						<span>Cac 40</span>
+						<span>Chiffres Boursiers</span>
 						<span class="glyphicon glyphicon-repeat pull-right"><style type="text/css">a:link{text-decoration:none}</style></span>
 					</h4>
 				</div>
 				<div class="panel-body3" onmouseover="this.style.cursor='default'">
+					<!-- 1ère colonne : Graphique -->
 					<div class="col-xs-8" id="courbe" style="min-width: 310px; height: 300px; margin: 0 auto"></div>
+					<!-- 2ème colonne : Chiffres -->
 					<div class="col-xs-4">
 						<hr/>
-						<strong><big>Cours<span class="pull-right">4431.81</span></big></strong><br/><br/>
-						<strong><big>Variation<span class="pull-right"><font color="green">+0.59%</font></span></big></strong><br/>
+							<strong><big>Cours<span class="pull-right">4431.81</span></big></strong><br/><br/>
+							<strong><big>Variation<font class="pull-right" color="Lime" size="5" style="margin-top:-8px">+0.59%</font></big></strong><br/>
 						<hr/><br/>
 						<big>Ouverture<span class="pull-right">4412.41</span></big><br/>
 						<big>+ HAUT<span class="pull-right"><font color="MediumSeaGreen">4432.64</font></span></big><br/>

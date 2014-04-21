@@ -7,13 +7,11 @@ var db = new sqlite3.Database("../protected/basearticle.db");
 
 var server = {};
 server.base = [];
-server.f = 0;
 server.fe = 0;
 server.articles = [];
 server.output = "";
 
 server.readbase = function(entreprise) {
-	server.f ++;
 	var i = 0;
 	if(entreprise == "all"){
 		var stmt = "SELECT * FROM basearticle";
@@ -25,12 +23,9 @@ server.readbase = function(entreprise) {
 			util.log(e);
 		} else {
 			server.fe ++;
-			util.log("------------------------ Chargement fe : " + server.fe);//------------------------------------------
 			ev.emit("charge", r.titre);
 			server.base[i] = r;
 			i++;
-			
-			ev.emit("ok");
 		}
     });
 };
@@ -40,17 +35,14 @@ server.readarticle = function(titre) {
 		fs.readFile("../protected/articlesfr/"+titre.substring(1)+".txt","UTF-8", function (e,d){
 			if (e) {
 				server.fe --;
-				util.log("------------------------ Erreur Lecture fe : " + server.fe);//------------------------------------------
 				util.log(e);
 			} else {
 				var article = JSON.parse(d);
-				util.log("------------------------ Lecture fe : " + server.fe);//------------------------------------------
 				ev.emit("ecris", article);
 			}
 		});
 	}else{
 		server.fe --;
-		util.log("------------------------ Existe pas fe : " + server.fe);//------------------------------------------
 		util.log("INFO : Article sans titre");
 	}
 };
@@ -66,7 +58,7 @@ server.envoi = function(article){
 			} else if (server.articles[i].note <= (-1)) {
 				color = " danger";
 			} else {
-				color = "";
+				color = " active";
 			}
 			
 			if (server.articles[i].image) {
@@ -79,9 +71,11 @@ server.envoi = function(article){
 							 ' <td style="width:80px"><img src="'+image+'" width=50 height=50></td>'+
 							 ' <td><span class="text-left"><small><font color="MediumBlue">'+server.articles[i].titre+'</small></font></span></td>'+
 							 '</tr>'+
-							 '<td colspan="6" class="hiddenRow  active">'+
+							 '<td colspan="6" class="hiddenRow" style="text-align:justify;" onmouseover="this.style.cursor=\'default\'">'+
 							 ' <div class="accordian-body collapse container-fluid" id="collapse'+i+'">'+
-							 '  <small><font color="#AAA">'+(server.articles[i].date).substring(0,10)+'</font><br/>'+server.articles[i].description+'<a href="'+server.articles[i].lien+'" target="_blank"><font color="Orchid"> Lire l\'article</font></a></small>'+
+							 '  <small><font color="#AAA">'+(server.articles[i].date).substring(0,10)+
+							 '</font><br/>'+server.articles[i].description+'<br/>'+
+							 '<a href="'+server.articles[i].lien+'" target="_blank" onmouseover="this.style.cursor=\'pointer\'"><font color="Orchid">Lire l\'article</font></a></small>'+
 							 ' </div>'+
 							 '</td>';
 		}
@@ -93,6 +87,14 @@ exports.start = function(that, fonc, search){
 	server.fonc = fonc;
 	server.that = that;
 	var entreprise;
+	
+	/*
+	util.log("-----------------------------------------------------------");
+	util.log("server.base : " + server.base);
+	util.log("server.fe : " + server.fe);
+	util.log("server.articles : " + server.articles);
+	util.log("-----------------------------------------------------------");
+	*/
 	
 	if (search) {
 		entreprise = search;
