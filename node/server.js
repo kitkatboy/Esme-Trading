@@ -1,8 +1,8 @@
 var http = require("http");
 var util = require("util");
 
-var recup_articles = require("../protected/recuperation_articles.js");
-var router = require("../protected/router.js");
+var recuperation_articles = require("../protected/js/recuperation_articles.js");
+var router = require("../protected/js/router.js");
 
 /* Création d'un objet serveur stockant les variables et methodes */
 var server = {};
@@ -17,7 +17,7 @@ http.createServer(server.receive_request).listen(server.port, server.address);
 		
 util.log("INFO - Demarrage du serveur, listening " + server.address + " : " + server.port);
 
-/* Appel des fonctions de récupération des données *//*
-setInterval(function () {
-	recup_articles.start()
-}, 1*60*1000)*/
+/* Appel des fonctions de récupération des données */
+/*setInterval(function () {
+	recuperation_articles.start()
+}, 10*1000);*/

@@ -80,7 +80,7 @@ go_post:
 		*/
 		util.log("Mail : " + paquets.mail + ", Id : " + paquets.id + ", MdP : " + paquets.mdp + ", act : " + paquets.act);
 		
-		post.postReq(paquets, this.resp);
+		post.postReq(paquets, this.req, this.resp);
     },
 
 get_method:

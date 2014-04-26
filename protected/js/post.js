@@ -1,9 +1,9 @@
 var database = require('./database.js');
 var lecture_articles = require('./lecture_articles.js');
 
-exports.postReq = function(paquets, resp) {
+exports.postReq = function(paquets, req, resp) {
 	console.log("Reception paquets : " + JSON.stringify(paquets));
-	var traitement_post = new constr_post_acceuil(paquets, resp);
+	var traitement_post = new constr_post_acceuil(paquets, req, resp);
 	
 	if (paquets.act == "identification") {
 		traitement_post.log();
@@ -11,8 +11,8 @@ exports.postReq = function(paquets, resp) {
 		traitement_post.create();
 	} else if (paquets.act == "deconnect") {
 		traitement_post.deconnect();
-	} else if (paquets.act == "chargement_articles") {//------------------------------------------------------
-		traitement_post.chargement_articles();
+	} else if (paquets.act == "chargement_articles") {
+		traitement_post.check_log();
 	} else {
 		traitement_post.reponse("Un problème est survenu lors du traitement de la requête");
 	}
@@ -21,9 +21,10 @@ exports.postReq = function(paquets, resp) {
 };
 
 /* Constructeur POST page acceuil*/
-constr_post_acceuil = function (paquets, resp) {
+constr_post_acceuil = function (paquets, req, resp) {
 	console.log("Appel du constructeur POST")
-	if(paquets && resp) {
+	if(paquets && req && resp) {
+		this.req = req;
 		this.resp = resp
 		this.mail = paquets.mail;
 		this.id = paquets.id;
@@ -38,6 +39,20 @@ constr_post_acceuil = function (paquets, resp) {
 };
 
 constr_post_acceuil.prototype = {
+
+
+// Check login temporaire ------------------------------------------------------
+check_log:
+	function () {
+		database.checkDatabase(this, this.act, "log_invalid");
+	},
+	
+log_invalid:
+	function () {
+		this.reponse("log out");
+	},
+//-------------------------------------------------------------------------------
+
 
 log:
 	function () {

@@ -40,10 +40,10 @@ pri.load_articles_back = function () {
 	if (this.readyState == 4 && this.status == 200) {
 		//alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
-		if (r.resp) {
-			//alert("this : " + r.resp);
+		if (r.resp == "log out") {
+			window.location.assign("/acceuil.html");
+		} else if (r.resp) {
 			document.getElementById('articles').innerHTML = r.resp;
-			
 		} else {
 			alert("Les articles n'ont pas pu être rafraichis");
 		}

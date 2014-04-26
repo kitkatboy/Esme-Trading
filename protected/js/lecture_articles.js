@@ -80,6 +80,10 @@ server.envoi = function(article){
 							 '</td>';
 		}
 		server.that[server.fonc](server.output);
+		ev._events = {};
+		server.articles.length = 0;
+		server.base.length = 0;
+		server.output = "";
 	}
 };
 
@@ -88,20 +92,11 @@ exports.start = function(that, fonc, search){
 	server.that = that;
 	var entreprise;
 	
-	/*
-	util.log("-----------------------------------------------------------");
-	util.log("server.base : " + server.base);
-	util.log("server.fe : " + server.fe);
-	util.log("server.articles : " + server.articles);
-	util.log("-----------------------------------------------------------");
-	*/
-	
 	if (search) {
 		entreprise = search;
 	} else {
 		entreprise = "all";
 	}
-	
 	ev.on("ecris",server.envoi);
 	ev.on("charge",server.readarticle);
 	

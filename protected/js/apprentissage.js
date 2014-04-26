@@ -4,7 +4,7 @@ var fs = require("fs");
 var events = require("events");
 var ev = new events.EventEmitter();
 var sqlite3 = require("sqlite3").verbose();
-var db = new sqlite3.Database("basearticle.db");
+var db = new sqlite3.Database("../basearticle.db");
 
 var server = {};
 server.dicoapp = {};
@@ -82,12 +82,12 @@ server.writeapp = function(){
 	if(/*!--server.fe*/server.fe == 40)
 	{
 		util.log("écriture d'appretissage");
-		fs.writeFile("dicoapp.txt", JSON.stringify(server.dicoapp), "UTF-8",function (r){});
+		fs.writeFile("../dicoapp.txt", JSON.stringify(server.dicoapp), "UTF-8",function (r){});
 	}
 };
 server.readdicoapp = function(){
 	server.f++;
-	fs.readFile("dicoapp.txt","UTF-8", function(e,d){
+	fs.readFile("../dicoapp.txt","UTF-8", function(e,d){
 		if(e) {
 			util.log("=(");
 		} else {
@@ -131,7 +131,7 @@ server.prepareapp = function(){
 };
 server.readarticle2 = function(text){
 
-		fs.readFile("articlesfr\\"+text+".txt","UTF-8", function(e,d){
+		fs.readFile("../articlesfr\\"+text+".txt","UTF-8", function(e,d){
 			if(e) {
 				util.log("=( :"+e);
 			} else {
@@ -148,7 +148,7 @@ server.readarticleall = function(){
 	for(i in server.base)
 	{
 		server.fe++;
-		fs.readFile("articlesfr\\"+server.base[i].titre+".txt","UTF-8", function(e,d){
+		fs.readFile("../articlesfr\\"+server.base[i].titre+".txt","UTF-8", function(e,d){
 			if(e) {
 				util.log("=( :"+e);
 			} else {
@@ -183,7 +183,7 @@ server.readbase = function(){
 //fonction de chargement du dico
 server.readdico = function(){
 server.f++;
-fs.readFile("dico2.txt","UTF-8", function(e,d){
+fs.readFile("../dico2.txt","UTF-8", function(e,d){
 		if(e) {
 			util.log("=(");
 		} else {
@@ -198,7 +198,7 @@ fs.readFile("dico2.txt","UTF-8", function(e,d){
 };
 server.readdico2 = function(){
 server.f++;
-fs.readFile("dicomulti.txt","UTF-8", function(e,d){
+fs.readFile("../dicomulti.txt","UTF-8", function(e,d){
 		if(e) {
 			util.log("=(");
 		} else {

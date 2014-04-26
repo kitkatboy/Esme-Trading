@@ -186,9 +186,9 @@ server.nouvdatabase = function(article,f){
 
 //Fonction d'écriture des articles dans le fichier articlesFr
 server.write = function(article){
-	util.log("écriture d'articles");
+	util.log("------------------------------------------------ écriture d'articles");
 	
-	//fs.writeFile("articlesfr\\"+article.titre+".txt", JSON.stringify(article), "UTF-8",function (r){});
+	fs.writeFile("../protected/articlesfr\\"+article.titre+".txt", JSON.stringify(article), "UTF-8",function (r){});
 };
 
 bob = function(){
@@ -217,7 +217,7 @@ server.initlisner = function(){
 //initialisation du dico
 server.addnote = function(){
 	var b = {'grimpe' : 1, 'décroit' : -1,'baisses' : -1,'bonne':1,'revenu':1,'déficit':-1,'bénéfices':1,'perd':-1,'valorisant':1,'recul':-1,'hausse':1,'progressent':1,'progresse':1,'améliore':1,'amélioration':1,'satisfaisants':1,'plus-value':1,'dévisse':-1,'inquiètent':-1,'dépréciation':-1,'prime':1,'plainte':-1,'antidumping':-1,'défaveur':-1,'prudentes':1,'prudente':1,'bon':1,'gagné':1,'renforcé':1,'contre-offensive':1,'séduire':1};
-	fs.writeFile("dico2.txt", JSON.stringify(b), "UTF-8",function (r){});
+	fs.writeFile("../protected/dico2.txt", JSON.stringify(b), "UTF-8",function (r){});
 	var a = {'très' : 2,'fort':2,'forte':2};
 	fs.writeFile("../protected/dicomulti.txt", JSON.stringify(a), "UTF-8",function (r){});
 	
