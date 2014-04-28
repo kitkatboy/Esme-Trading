@@ -147,52 +147,6 @@ server.test1 = function(article){
 	}
 };
 
-//Fonction de notation des articles
-
-server.note2 = function(article){
-	var f= server.fe;
-	server.fe++;
-	var tmp = article.description;
-	reg = new RegExp("[!:;.,?]","g");
-	tmp = tmp.replace(reg,"");
-	tmp = tmp.replace("\'"," ");
-	util.puts(tmp);
-	var desc = tmp.split(" ");
-	for(i in desc){
-		if(server.dico[desc[i]]){
-			article.note += server.dico[desc[i]];
-		}
-	}
-	ev.emit("miseajourdatabase",article);
-	server.write(article);
-};
-
-server.note22 = function(article){
-	util.log("Evaluation de l'article");
-	var f= server.fe;
-	server.fe++;
-	var tmp = article.description;
-	reg = new RegExp("[!:;.,?]","g");
-	tmp = tmp.replace(reg,"");
-	tmp = tmp.replace("\'"," ");
-	//util.puts(tmp);
-	var desc = tmp.split(" ");
-	
-	for(i in desc){
-		if(server.dico[desc[i]]){
-			if(server.dico2[desc[i-1]]){
-				article.note += server.dico[desc[i]] * server.dico2[desc[i-1]];
-			}
-			else{
-				article.note += server.dico[desc[i]];
-			}
-		}
-	}
-	util.log("Note de l'article : " + article.note);
-	
-	ev.emit("miseajourdatabase",article);
-};
-
 //Fonction de mise a jour de la base de donnée
 server.nouvdatabase = function(article){
 	util.log("Enregistrement de l'article dans la database : " + article.titre);
@@ -223,31 +177,6 @@ bob = function(){
 	ev.removeAllListeners();
 	//server.test1 = function(){};
 };
-
-//fonction d'initialisation des lisner
-/*
-server.initlisner = function(){
-	//server.f = 0;
-	ev.once("read",server.readdico);
-	ev.once("read",server.readdico2);
-	ev.once("read",server.readbase);
-	//ev.once("read",server.get);
-	ev.on("ok",server.get);
-	//ev.on("ok",server.testemit);
-	ev.on("test",server.test1);
-	//ev.on("ecris",server.note22);
-	ev.on("miseajourdatabase",server.nouvdatabase);
-	ev.on("cassetout",bob);
-	
-	ev.once("read",server.readdicoapp);
-	ev.on("apprend",server.app);
-	ev.on("ecris",server.note23);
-	ev.on("travailapp",server.prepareapp);
-	ev.on("ecritlapp",server.writeapp);
-	//ev.on("ecris",server.note2);
-	util.log("Les listener sont initialises");
-	
-};*/
 
 //initialisation du dico
 server.addnote = function(){
