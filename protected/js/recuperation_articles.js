@@ -12,6 +12,7 @@ server.fe = 0;
 server.charge = 0;
 server.api = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%3D'http%3A%2F%2Fwww.investir.fr%2FRSS%2Fcac40.xml'&format=json&diagnostics=true";//&callback=cbfunc";
 
+server.dicoapp = {};
 
 //fonction de chargement du dico
 server.readdico = function(){
@@ -224,6 +225,7 @@ bob = function(){
 };
 
 //fonction d'initialisation des lisner
+/*
 server.initlisner = function(){
 	//server.f = 0;
 	ev.once("read",server.readdico);
@@ -233,12 +235,19 @@ server.initlisner = function(){
 	ev.on("ok",server.get);
 	//ev.on("ok",server.testemit);
 	ev.on("test",server.test1);
-	ev.on("ecris",server.note22);
+	//ev.on("ecris",server.note22);
 	ev.on("miseajourdatabase",server.nouvdatabase);
 	ev.on("cassetout",bob);
+	
+	ev.once("read",server.readdicoapp);
+	ev.on("apprend",server.app);
+	ev.on("ecris",server.note23);
+	ev.on("travailapp",server.prepareapp);
+	ev.on("ecritlapp",server.writeapp);
 	//ev.on("ecris",server.note2);
 	util.log("Les listener sont initialises");
-};
+	
+};*/
 
 //initialisation du dico
 server.addnote = function(){
@@ -255,6 +264,108 @@ exports.create = function () {
     db.close();
 };
 
+//-------------------------------------apprentissage-------------------------------
+server.app = function(note, nouvmots){
+	//util.log(util.inspect(nouvmots));
+	 for(i in nouvmots){
+		//nouvmots[i] = {};
+		
+		if(!server.dicoapp[nouvmots[i]]){
+			server.dicoapp[nouvmots[i]]={};
+			server.dicoapp[nouvmots[i]].note = note;
+			server.dicoapp[nouvmots[i]].nb = 1;
+			//util.log(nouvmots[i] +" : "+ util.inspect(server.dicoapp[nouvmots[i]]));
+		}
+		else{
+			server.dicoapp[nouvmots[i]].note += note;
+			server.dicoapp[nouvmots[i]].nb++;
+		}
+	}
+	//server.writeapp();
+	ev.emit("ecritlapp");
+};
+
+server.writeapp = function(){
+//util.log("server.fe : "+server.fe);
+	if(/*!--server.fe*/server.fe == 40)
+	{
+		util.log("écriture d'appretissage");
+		fs.writeFile("../protected/dicoapp.txt", JSON.stringify(server.dicoapp), "UTF-8",function (r){});
+	}
+};
+
+server.readdicoapp = function(){
+	server.charge++;
+	fs.readFile("../protected/dicoapp.txt","UTF-8", function(e,d){
+		if(e) {
+			util.log("=(");
+		} else {
+			server.dicoapp = JSON.parse(d);
+			
+			util.log("dicoapp charge");
+			ev.emit("travailapp");
+			//util.log(util.inspect(server.dicoapp));
+		}
+	});
+};
+
+server.prepareapp = function(){
+	 for(i in server.dicoapp){
+		server.dicoapp[i].coef = server.dicoapp[i].note/(server.dicoapp[i].nb*10);
+	}
+	//util.log(util.inspect(server.dicoapp));
+	server.charge--;
+	ev.emit("ok");
+};
+
+
+server.note23 = function(article){
+	var f= server.fe;
+	server.fe++;
+	var tmp = article.description;
+	reg = new RegExp("[!:;.,?]","g");
+	tmp = tmp.replace(reg,"");
+	
+	tmp = tmp.replace("\'"," ");
+	//util.log(tmp);
+	//util.puts(tmp);
+	var desc = tmp.split(" ");
+	var cpt = 0;
+	var tmp2 = [];
+	for(i in desc){
+		if(server.dico[desc[i]]){
+			if(server.dico2[desc[i-1]]){ //analyse sémantique
+				article.note += server.dico[desc[i]] * server.dico2[desc[i-1]];
+				//util.log("multipli : " + desc[i-1] +" = "+server.dico2[desc[i-1]]+ " x " + desc[i]+" = "+server.dico[desc[i]]);
+				//util.log(article.note);
+			} else{
+				article.note += server.dico[desc[i]];
+				//util.log("add : " + desc[i]);
+			}
+		}
+		else if((desc[i].length>3)&&(!server.dico2[desc[i]])){
+			if(server.dicoapp[desc[i]]){
+				if(server.dicoapp[desc[i]].nb > 10){
+					article.note += server.dicoapp[desc[i]].coef;
+				}
+			}
+			tmp2[cpt] = desc[i];
+			cpt++;
+		}
+		/*else if((desc[i].length>3)&&(!server.dico2[desc[i]])){
+			tmp2[cpt] = desc[i];
+			cpt++;
+			
+		}*/
+	}//util.log("tmp = " +util.inspect(tmp2));
+	//util.log("note : "+article.note);
+	ev.emit("apprend",article.note,tmp2);
+	ev.emit("miseajourdatabase",article);
+	//ev.emit("miseajourdatabase",article);
+	//server.write(article);
+};
+
+//----------------------------------fin apprentissage--------------------------------
 exports.read = function () {
     var stmt = "SELECT * FROM basearticle ";//WHERE entreprise = 'BOUYGUES '";
 	var tmp = [];
@@ -270,7 +381,29 @@ exports.read = function () {
     });
     //db.close();
 };
-
+//fonction d'initialisation des lisner
+server.initlisner = function(){
+	//server.f = 0;
+	ev.once("read",server.readdico);
+	ev.once("read",server.readdico2);
+	ev.once("read",server.readbase);
+	//ev.once("read",server.get);
+	ev.on("ok",server.get);
+	//ev.on("ok",server.testemit);
+	ev.on("test",server.test1);
+	//ev.on("ecris",server.note22);
+	ev.on("miseajourdatabase",server.nouvdatabase);
+	ev.on("cassetout",bob);
+	
+	ev.once("read",server.readdicoapp);
+	ev.on("apprend",server.app);
+	ev.on("ecris",server.note23);
+	ev.on("travailapp",server.prepareapp);
+	ev.on("ecritlapp",server.writeapp);
+	//ev.on("ecris",server.note2);
+	util.log("Les listener sont initialises");
+	
+};
 exports.start = function () {
 	server.initlisner(); // Initialisation de tous les listener
 	ev.emit("read"); // Lancement du processus

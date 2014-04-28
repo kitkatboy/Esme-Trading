@@ -107,7 +107,8 @@ exports.start = function(that, fonc, search){
 	if (search == "") {
 		entreprise = "all";
 	} else {
-		entreprise = search;
+		search = search.toUpperCase();
+		entreprise = search.replace(" SA","");
 	}
 	
 	ev.on("ecris",server.envoi);
