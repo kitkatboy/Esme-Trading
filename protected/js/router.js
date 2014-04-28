@@ -78,7 +78,7 @@ go_post:
 		* util.inspect() -> affiche le contenu d'un objet sous forme d'une chaîne de caractères
 		* JSON.parse() -> Convertie un String en JSON
 		*/
-		util.log("Mail : " + paquets.mail + ", Id : " + paquets.id + ", MdP : " + paquets.mdp + ", act : " + paquets.act);
+		util.log("Mail : " + paquets.mail + ", Id : " + paquets.id + ", MdP : " + paquets.mdp + ", act : " + paquets.act + ", search : " + paquets.search);
 		
 		post.postReq(paquets, this.req, this.resp);
     },

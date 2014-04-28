@@ -31,6 +31,7 @@ constr_post_acceuil = function (paquets, req, resp) {
 		this.mdp = paquets.mdp;
 		this.log_temp = paquets.log_temp;
 		this.act = paquets.act;
+		this.search = paquets.search;
 	} else {
 		console.log("ERROR - L'\objet POST n\'a pas pu etre construit.");
 		return;
@@ -74,8 +75,8 @@ deconnect:
 	
 chargement_articles:
 	function () {
-		console.log("Chargement des donnees d'actualites");
-		lecture_articles.start(this, "reponse");
+		console.log("Chargement des donnees d'actualites : " + this.search);
+		lecture_articles.start(this, "reponse", this.search);
 	},
 
 reponse:

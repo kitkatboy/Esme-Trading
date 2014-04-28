@@ -80,8 +80,8 @@ exports.checkDatabase = function (obj, function1, function2) {
 		db.get(stmt, function (e, r) {
 			//console.log("-----------------------" + util.inspect(r));
 			if (r) {
-				if (((new_date.valueOf() - r.date)/(1000)) < 10) {
-					util.log("Actualisation de la date d'expiration du login temporaire");
+				if (((new_date.valueOf() - r.date)/(1000)) < 3*60) {
+					util.log("Actualisation de la date du login temporaire");
 					var stmt2 = db.prepare("UPDATE database SET date = "+new_date.valueOf()+" WHERE log_temp = " + log_temp);
 					stmt2.run();
 					stmt2.finalize();

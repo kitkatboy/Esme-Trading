@@ -8,77 +8,74 @@ var db = new sqlite3.Database("../protected/basearticle.db");
 
 var server = {};
 server.base = [];
-server.f = 0;
 server.fe = 0;
+server.charge = 0;
 server.api = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%3D'http%3A%2F%2Fwww.investir.fr%2FRSS%2Fcac40.xml'&format=json&diagnostics=true";//&callback=cbfunc";
 
 
 //fonction de chargement du dico
 server.readdico = function(){
-server.f++;
-fs.readFile("../protected/dico2.txt","UTF-8", function(e,d){
+	server.charge++;
+	fs.readFile("../protected/dico2.txt","UTF-8", function(e,d){
 		if(e) {
-			util.log("=(" + e);
-		} else {
-			server.dico = JSON.parse(d);
+			util.log("ERROR Dictionnaire 1 : " + e);
+		} else if (d) {
+			server.dico = JSON.parse(d); // Chargement du dictionnaire de mots dans une variable
 			
-			util.log("dico charge");
+			util.log("Dictionnaire 1 charge");
+			server.charge--;
 			ev.emit("ok");
-			util.log(util.inspect(server.dico));
+			//util.log(util.inspect(server.dico));
 		}
+		/*
 		var i=0;
-for(a in server.dico){
-	i++;
-}
-console.log(i);
+		for(i in server.dico){
+			i++;
+		}
+		*/
 	});
 	
 };
+
 server.readdico2 = function(){
-server.f++;
-fs.readFile("../protected/dicomulti.txt","UTF-8", function(e,d){
+	server.charge++;
+	fs.readFile("../protected/dicomulti.txt","UTF-8", function(e,d){
 		if(e) {
-			util.log("=(");
-		} else {
-			server.dico2 = JSON.parse(d);
+			util.log("ERROR Dictionnaire 2 : " + e);
+		} else if (d) {
+			server.dico2 = JSON.parse(d); // Chargement des adjectifs dans une variable
 			
-			util.log("dico charge");
+			util.log("Dictionnaire 2 charge");
+			server.charge--;
 			ev.emit("ok");
-			util.log(util.inspect(server.dico2));
+			//util.log(util.inspect(server.dico2));
 		}
-		var i=0;
-for(a in server.dico2){
-	i++;
-}
-console.log(i);
 	});
 };
 
 //fonction de chargement de la base de donnée des articles
 server.readbase = function(){
-	server.f ++;
+	server.charge++;
 	var i = 0;
 	var stmt = "SELECT * FROM basearticle";
     db.each(stmt, function (e, r) {
 		if(e){
-			util.log(e);
+			util.log("ERROR Base de donnees : " + e);
+		} else if (r) {
+			server.base[i] = r;
+			i++;
 		}
-        server.base[i] = r;
-		i++;
-		util.log(i);
-		
     });
+	util.log("Base de donnees charge");
+	server.charge--;
 	ev.emit("ok");	
 };
 
 //Fonction de récupération des articles a partir du lien YQL
 server.get = function() {
-console.log("ok");
-	if(!--server.f){
-			util.log("ok!");
-		server.f ++;
+	if(server.charge == 0){
 		var b = "";
-		util.log("récupération d'articles");
+		util.log("recuperation des articles depuis le lien YQL");
 		http.get(server.api, function (r) {
 			r.on("data", function (d) {
 				b += d;
@@ -96,7 +93,7 @@ console.log("ok");
 //Fonction de mise en forme des articles
 server.mef = function(flux){
 	var articles = [];
-	util.log("mise en forme d'articles");
+	util.log("mise en forme des articles recuperes");
 	for (i in flux.query.results.item) {
 		var tmp = {}; 
 		tmp.titre = flux.query.results.item[i].title;
@@ -106,7 +103,10 @@ server.mef = function(flux){
 		tmp.lien = flux.query.results.item[i].link;
 		tmp.note=0;
 		articles[i] = tmp;
-		if(tmp.description){
+		
+		//util.log("Article recupere : " + tmp.titre);
+		if(tmp.description && tmp.titre){
+			util.log("Fin de la mise en forme");
 			ev.emit("test",articles[i]);
 		}
     }
@@ -116,23 +116,35 @@ server.mef = function(flux){
 server.test1 = function(article){
 	var titre;
 	var f = "ecris";
-	util.log("comparaison");
 	titre = article.titre.split(":");
 	article.societe = titre[0];//TO DO
 	article.titre = titre[1];
 	
-	for(b in server.base) {
-		if(titre[1] == server.base[b].titre){
-			f = "";
-			util.log("non");
-			ev.emit("cassetout");
-			break;	
+	util.log("Comparaison avec la base de donnees : " + article.titre);
+	
+	if (article.titre) {
+		do {
+			article.titre = article.titre.replace('?', '.');
+		}while((article.titre).indexOf("?") >= 0);
+		
+		for(b in server.base) {
+			if(article.titre == server.base[b].titre){
+				f = "";
+				util.log("Article deja enregistre : " + article.titre);
+				ev.emit("cassetout");
+				break;	
+			} else {
+				util.log("Nouvel article : " + article.titre);
+			}
 		}
+		ev.emit(f,article);
+	} else {
+		util.log("ERROR - Le titre de l'article n'est pas defini");
 	}
-	ev.emit(f,article);
 };
 
 //Fonction de notation des articles
+
 server.note2 = function(article){
 	var f= server.fe;
 	server.fe++;
@@ -152,14 +164,16 @@ server.note2 = function(article){
 };
 
 server.note22 = function(article){
+	util.log("Evaluation de l'article");
 	var f= server.fe;
 	server.fe++;
 	var tmp = article.description;
 	reg = new RegExp("[!:;.,?]","g");
 	tmp = tmp.replace(reg,"");
 	tmp = tmp.replace("\'"," ");
-	util.puts(tmp);
+	//util.puts(tmp);
 	var desc = tmp.split(" ");
+	
 	for(i in desc){
 		if(server.dico[desc[i]]){
 			if(server.dico2[desc[i-1]]){
@@ -170,48 +184,57 @@ server.note22 = function(article){
 			}
 		}
 	}
+	util.log("Note de l'article : " + article.note);
+	
 	ev.emit("miseajourdatabase",article);
-	server.write(article);
 };
 
 //Fonction de mise a jour de la base de donnée
-server.nouvdatabase = function(article,f){
-	util.log("mise a jour database");
+server.nouvdatabase = function(article){
+	util.log("Enregistrement de l'article dans la database : " + article.titre);
+
 	db.serialize( function () {
 		var stmt = db.prepare("INSERT INTO basearticle VALUES (?,?,?,?)");
 		stmt.run(article.societe, article.titre,article.date, article.note);
 		stmt.finalize();
 	});
+	
+	server.write(article);
 };
 
 //Fonction d'écriture des articles dans le fichier articlesFr
 server.write = function(article){
-	util.log("------------------------------------------------ écriture d'articles");
+	util.log("Ecriture de l'article dans un fichier texte");
 	
-	fs.writeFile("../protected/articlesfr\\"+article.titre+".txt", JSON.stringify(article), "UTF-8",function (r){});
+	fs.writeFile("../protected/articlesfr\\"+article.societe+"-"+article.titre+".txt", JSON.stringify(article), "UTF-8",function (e){
+		if (e) {
+			util.log("ERROR - " + e);
+			util.log("---------------- " + article.societe + "-" + article.titre);
+		}
+	});
 };
 
 bob = function(){
-	console.log("bob");
+	util.log("Annulation de l'enregistrement des articles");
 	ev.removeAllListeners();
-	server.test1 = function(){console.log("plus rien");};
+	server.test1 = function(){};
 };
 
 //fonction d'initialisation des lisner
 server.initlisner = function(){
-	server.f = 0;
+	//server.f = 0;
 	ev.once("read",server.readdico);
 	ev.once("read",server.readdico2);
 	ev.once("read",server.readbase);
 	//ev.once("read",server.get);
 	ev.on("ok",server.get);
 	//ev.on("ok",server.testemit);
+	ev.on("test",server.test1);
 	ev.on("ecris",server.note22);
 	ev.on("miseajourdatabase",server.nouvdatabase);
-	ev.on("test",server.test1);
 	ev.on("cassetout",bob);
 	//ev.on("ecris",server.note2);
-	console.log("You");
+	util.log("Les listener sont initialises");
 };
 
 //initialisation du dico
@@ -222,32 +245,34 @@ server.addnote = function(){
 	fs.writeFile("../protected/dicomulti.txt", JSON.stringify(a), "UTF-8",function (r){});
 	
 };
-create = function () {
+
+exports.create = function () {
+	util.log("Creation de la base de donnees des articles");
 	db.run("CREATE TABLE basearticle (entreprise TEXT, titre TEXT,date TEXT, note TEXT)");
     db.close();
 };
-read = function () {
+
+exports.read = function () {
     var stmt = "SELECT * FROM basearticle ";//WHERE entreprise = 'BOUYGUES '";
 	var tmp = [];
 	var i = 0;
     db.each(stmt, function (e, r) {
 		if(e){
 			util.log(e);
+		} else if (r) {
+			//tmp[i] =  r;
+			//i++;
+			util.log(util.inspect(r));
 		}
-			tmp[i] =  r;
-			i++;
-			console.log(/*r.titre +":" +*/r.note);
     });
     //db.close();
 };
 
 exports.start = function () {
-	console.log("Yeh");
-	server.initlisner();
-	console.log("Yop");
-	ev.emit("read");
+	server.initlisner(); // Initialisation de tous les listener
+	ev.emit("read"); // Lancement du processus
 };
 
-//create();
+//exports.create();
 //server.addnote();
-//read();
+//exports.read();

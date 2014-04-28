@@ -12,6 +12,8 @@ pri.on_click = function (ev) {
     var src = ev.target;
 	if (src.has_class("post1")) {
 		pri.send_post1();
+	} else if (src.has_class("search")) {
+		pri.load_art();
 	}
 };
 
@@ -31,8 +33,10 @@ pri.post1_back = function () {
 };
 
 pri.load_art = function() {
+	var entreprise = document.getElementsByClassName("entreprise")[0].value;
+	
 	// Création d'un objet contenant les données
-    var data = {act: "chargement_articles"};
+    var data = {act: "chargement_articles", search: entreprise};
 	client.post(data, pri.load_articles_back);
 };
 
@@ -42,6 +46,8 @@ pri.load_articles_back = function () {
 		var r = JSON.parse(this.responseText);
 		if (r.resp == "log out") {
 			window.location.assign("/acceuil.html");
+		} else if (r.resp == "no result") {
+			alert("Aucun article correspondant");
 		} else if (r.resp) {
 			document.getElementById('articles').innerHTML = r.resp;
 		} else {

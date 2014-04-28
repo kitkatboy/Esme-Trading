@@ -16,23 +16,35 @@ server.readbase = function(entreprise) {
 	if(entreprise == "all"){
 		var stmt = "SELECT * FROM basearticle";
 	} else {
-		var stmt = "SELECT * FROM basearticle WHERE entreprise = \'" + entreprise + "\'";
+		var stmt = "SELECT * FROM basearticle WHERE entreprise = '" + entreprise + " '";
 	}
-    db.each(stmt, function (e, r) {
-		if (e) {
-			util.log(e);
-		} else {
-			server.fe ++;
-			ev.emit("charge", r.titre);
-			server.base[i] = r;
-			i++;
-		}
-    });
+	
+	db.serialize(function () {
+		db.get(stmt, function (e, r) {
+			if (e) {
+				util.log(e);
+			} else if (r) {
+				db.each(stmt, function (e, r) {
+					if (e) {
+						util.log(e);
+					} else if (r) {
+						server.fe ++;
+						ev.emit("charge", r.entreprise, r.titre);
+						server.base[i] = r;
+						i++;
+					}
+				});
+			} else {
+				server.that[server.fonc]("no result");
+				ev._events = {};
+			}
+		});
+	});
 };
 
-server.readarticle = function(titre) {
-	if (titre) {
-		fs.readFile("../protected/articlesfr/"+titre.substring(1)+".txt","UTF-8", function (e,d){
+server.readarticle = function(entreprise, titre) {
+	if (entreprise && titre) {
+		fs.readFile("../protected/articlesfr/"+entreprise.substring(0, entreprise.length - 1)+" - "+titre.substring(1)+".txt","UTF-8", function (e,d){
 			if (e) {
 				server.fe --;
 				util.log(e);
@@ -43,7 +55,7 @@ server.readarticle = function(titre) {
 		});
 	}else{
 		server.fe --;
-		util.log("INFO : Article sans titre");
+		util.log("INFO : Nom de l'entreprise ou titre de l'article manquant");
 	}
 };
 
@@ -92,11 +104,12 @@ exports.start = function(that, fonc, search){
 	server.that = that;
 	var entreprise;
 	
-	if (search) {
-		entreprise = search;
-	} else {
+	if (search == "") {
 		entreprise = "all";
+	} else {
+		entreprise = search;
 	}
+	
 	ev.on("ecris",server.envoi);
 	ev.on("charge",server.readarticle);
 	
