@@ -1,5 +1,6 @@
 var database = require('./database.js');
 var lecture_articles = require('./lecture_articles.js');
+var databaseChiffres = require('./databaseChiffres.js');
 
 exports.postReq = function(paquets, req, resp) {
 	console.log("Reception paquets : " + JSON.stringify(paquets));
@@ -12,6 +13,10 @@ exports.postReq = function(paquets, req, resp) {
 	} else if (paquets.act == "deconnect") {
 		traitement_post.deconnect();
 	} else if (paquets.act == "chargement_articles") {
+		traitement_post.check_log();
+	} else if (paquets.act == "chargement_entreprises") {
+		traitement_post.check_log();
+	} else if (paquets.act == "chargement_courbe") {
 		traitement_post.check_log();
 	} else {
 		traitement_post.reponse("Un problème est survenu lors du traitement de la requête");
@@ -77,6 +82,18 @@ chargement_articles:
 	function () {
 		console.log("Chargement des donnees d'actualites : " + this.search);
 		lecture_articles.start(this, "reponse", this.search);
+	},
+	
+chargement_entreprises:
+	function () {
+		console.log("Chargement des noms d'entreprises : "/* + this.search*/); //TO DO--------------
+		databaseChiffres.getName(this, "reponse"/*, this.search*/);
+	},
+	
+chargement_courbe:
+	function () {
+		console.log("Chargement de la courbe : "/* + this.search*/); //TO DO--------------
+		databaseChiffres.readAll(this, "reponse"/*, this.search*/);
 	},
 
 reponse:

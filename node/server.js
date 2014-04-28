@@ -23,4 +23,4 @@ setInterval(function () {
 	recuperation_articles.start()
 }, 5*1000);
 */
-recuperation_articles.read();
+//recuperation_articles.read();
