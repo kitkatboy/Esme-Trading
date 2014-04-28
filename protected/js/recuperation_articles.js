@@ -92,8 +92,10 @@ server.get = function() {
 
 //Fonction de mise en forme des articles
 server.mef = function(flux){
+	
 	var articles = [];
 	util.log("mise en forme des articles recuperes");
+	//util.log(ev._events["test"]);
 	for (i in flux.query.results.item) {
 		var tmp = {}; 
 		tmp.titre = flux.query.results.item[i].title;
@@ -106,7 +108,7 @@ server.mef = function(flux){
 		
 		//util.log("Article recupere : " + tmp.titre);
 		if(tmp.description && tmp.titre){
-			util.log("Fin de la mise en forme");
+			//util.log("Fin de la mise en forme");
 			ev.emit("test",articles[i]);
 		}
     }
@@ -114,6 +116,7 @@ server.mef = function(flux){
 
 //Fonction de test des nouveaux articles
 server.test1 = function(article){
+
 	var titre;
 	var f = "ecris";
 	titre = article.titre.split(":");
@@ -217,7 +220,7 @@ server.write = function(article){
 bob = function(){
 	util.log("Annulation de l'enregistrement des articles");
 	ev.removeAllListeners();
-	server.test1 = function(){};
+	//server.test1 = function(){};
 };
 
 //fonction d'initialisation des lisner
