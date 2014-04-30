@@ -36,7 +36,7 @@ constr_post_acceuil = function (paquets, req, resp) {
 		this.mdp = paquets.mdp;
 		this.log_temp = paquets.log_temp;
 		this.act = paquets.act;
-		this.search = paquets.search;
+		//this.search = paquets.search;
 	} else {
 		console.log("ERROR - L'\objet POST n\'a pas pu etre construit.");
 		return;
@@ -80,19 +80,19 @@ deconnect:
 	
 chargement_articles:
 	function () {
-		console.log("Chargement des donnees d'actualites : " + this.search);
-		lecture_articles.start(this, "reponse", this.search);
+		console.log("Chargement des donnees d'actualites"/* + this.search*/);
+		lecture_articles.start(this, "reponse"/*, this.search*/);
 	},
 	
 chargement_entreprises:
 	function () {
-		console.log("Chargement des noms d'entreprises : "/* + this.search*/); //TO DO--------------
+		console.log("Chargement des noms d'entreprises"/* + this.search*/); //TO DO--------------
 		databaseChiffres.getName(this, "reponse"/*, this.search*/);
 	},
 	
 chargement_courbe:
 	function () {
-		console.log("Chargement de la courbe : "/* + this.search*/); //TO DO--------------
+		console.log("Chargement de la courbe"/* + this.search*/); //TO DO--------------
 		databaseChiffres.readAll(this, "reponse"/*, this.search*/);
 	},
 

@@ -70,7 +70,7 @@ exports.getName=function(that, fonc){
 		} else if (data) {
 		data = JSON.parse(data);
 			for(i=0; i<data.nom.length-1; i++) {
-				output += '<a href="#"><small><font color="SteelBlue">'+data.nom[i].name+'</font></small></a><br/>';
+				output += '<a href="#"><small><font color="SteelBlue"><li style="line-height:15px;">'+data.nom[i].name+'</li></font></small></a><br/>';
 			} 
 		} else {
 			that[fonc]("no result");	

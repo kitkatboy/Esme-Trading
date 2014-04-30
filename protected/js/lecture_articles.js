@@ -9,21 +9,21 @@ var server = {};
 server.base = [];
 server.fe = 0;
 server.articles = [];
-server.output = "";
+//server.output = "";
 
-server.readbase = function(entreprise) {
+server.readbase = function(/*entreprise*/) {
 	var i = 0;
-	if(entreprise == "all"){
+	//if(entreprise == "all"){
 		var stmt = "SELECT * FROM basearticle";
-	} else {
+	/*} else {
 		var stmt = "SELECT * FROM basearticle WHERE entreprise = '" + entreprise + " '";
-	}
+	}*/
 	
-	db.serialize(function () {
+	/*db.serialize(function () {
 		db.get(stmt, function (e, r) {
 			if (e) {
 				util.log(e);
-			} else if (r) {
+			} else if (r) {*/
 				db.each(stmt, function (e, r) {
 					if (e) {
 						util.log(e);
@@ -34,12 +34,12 @@ server.readbase = function(entreprise) {
 						i++;
 					}
 				});
-			} else {
+			/*} else {
 				server.that[server.fonc]("no result");
 				ev._events = {};
 			}
 		});
-	});
+	});*/
 };
 
 server.readarticle = function(entreprise, titre) {
@@ -60,11 +60,11 @@ server.readarticle = function(entreprise, titre) {
 };
 
 server.envoi = function(article){
-	var color;
-	var image;
+	//var color;
+	//var image;
 	server.articles[server.articles.length] = article;
 	if(!--server.fe){
-		for(i in server.articles){
+		/*for(i in server.articles){
 			if (server.articles[i].note >= 1) {
 				color = " success";
 			} else if (server.articles[i].note <= (-1)) {
@@ -90,30 +90,30 @@ server.envoi = function(article){
 							 '<a href="'+server.articles[i].lien+'" target="_blank" onmouseover="this.style.cursor=\'pointer\'"><font color="Orchid">Lire l\'article</font></a></small>'+
 							 ' </div>'+
 							 '</td>';
-		}
-		server.that[server.fonc](server.output);
+		}*/
+		server.that[server.fonc](server.articles);
 		ev._events = {};
 		server.articles.length = 0;
 		server.base.length = 0;
-		server.output = "";
+		//server.output = "";
 	}
 };
 
-exports.start = function(that, fonc, search){
+exports.start = function(that, fonc/*, search*/){
 	server.fonc = fonc;
 	server.that = that;
-	var entreprise;
-	
+	//var entreprise;
+	/*
 	if (search == "") {
 		entreprise = "all";
 	} else {
 		search = search.toUpperCase();
 		entreprise = search.replace(" SA","");
 	}
-	
+	*/
 	ev.on("ecris",server.envoi);
 	ev.on("charge",server.readarticle);
 	
-	server.readbase(entreprise);
+	server.readbase(/*entreprise*/);
 };
 

@@ -4464,6 +4464,12 @@ a.thumbnail.active {
 .alert-success hr {
   border-top-color: #c9e2b3;
 }
+.positif {
+  background-color: #d6e9c6;
+}
+.negatif {
+  background-color: #f2dede;
+}
 .alert-success .alert-link {
   color: #2b542c;
 }
@@ -4769,9 +4775,10 @@ a.list-group-item-danger.active:focus {
 .panel-body1 {
   padding: 1px;
   margin-bottom: 1px;
-  max-height: 851px;
-  overflow: auto;
-  border-radius: 4px;
+  margin-left: 1px;
+  max-height: 763px;
+  overflow-y: auto;
+  border-radius: 3px;
 }
 /*--------------------------------------Modifiée----------------------------------*/
 .panel-body2 {

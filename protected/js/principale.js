@@ -1,4 +1,6 @@
 var pri = {};
+pri.interv_search;
+
 
 /* Script sur action "click" */
 pri.init = function () {
@@ -7,6 +9,8 @@ pri.init = function () {
 	pri.load_art();
 	pri.load_ents();
 	pri.load_courbe();
+	document.getElementById("search").onfocus = function (){pri.interv_search = setInterval(pri.search, 10);};
+	document.getElementById("search").onblur = function () {clearInterval(pri.interv_search)};
 };
 
 pri.on_click = function (ev) {
@@ -14,8 +18,6 @@ pri.on_click = function (ev) {
     var src = ev.target;
 	if (src.has_class("post1")) {
 		pri.send_post1();
-	} else if (src.has_class("search")) {
-		pri.load_art();
 	}
 };
 
@@ -34,27 +36,113 @@ pri.post1_back = function () {
 	}
 };
 
-pri.load_art = function() {
-	var entreprise = document.getElementsByClassName("entreprise")[0].value;
+pri.search = function () {
+	var i = 0;
+	var entreprise = document.getElementsByClassName("entreprise")[0].value.toLowerCase();
+	var article = document.getElementById("article"+i);
+	
+	while (article) {
+		if (entreprise) {
+			article = document.getElementById("article"+i);
+			
+			if (!article)
+				break;
+			article = article.innerHTML;
+			
+			if (article.indexOf(entreprise) < 0) {
+				document.getElementById("article"+i).classList.add("hidden");
+			} else {
+				document.getElementById("article"+i).className = "col-xs-12";
+			}
+		} else {
+			article = document.getElementById("article"+i);
+			
+			if (!article)
+				break;
+			article = article.className;
+			
+			if (article.indexOf("hidden") >= 0) {
+				document.getElementById("article"+i).className = "col-xs-12";
+			}
+		}
+		i++
+	}
+}
+
+pri.load_art = function () {
+	/*var entreprise = document.getElementsByClassName("entreprise")[0].value;*/
 	
 	// Création d'un objet contenant les données
-    var data = {act: "chargement_articles", search: entreprise};
+    var data = {act: "chargement_articles"/*, search: entreprise*/};
 	client.post(data, pri.load_articles_back);
 };
 
 pri.load_articles_back = function () {
 	if (this.readyState == 4 && this.status == 200) {
-		//alert("this : " + this.responseText);
-		var r = JSON.parse(this.responseText);
-		if (r.resp == "log out") {
+		var articles = JSON.parse(this.responseText);
+		var output = "";
+		var color = "";
+		articles = articles.resp;
+		if (typeof articles == "object") {
+			for(i in articles){
+				if (articles[i].note >= 1) {
+					color = 'positif';
+				} else if (articles[i].note <= (-1)) {
+					color = 'negatif';
+				} else {
+					color = 'alert-active';
+				}
+				
+				if (articles[i].image) {
+					image = articles[i].image.url;
+				} else if (!(articles[i].image)) {
+					image = "../images/NotFound.jpg";
+				}
+				
+				output +=	'<div id="article'+i+'" class="col-xs-12" style="padding-right:0px";>' +
+								'<div class="row accordion-toggle '+color+'" data-toggle="collapse" data-target="#collapse'+i+'" style="margin:0px;">'+
+									'<div class="col-xs-3" style="width:80px; padding:0px; margin:15px; margin-right:-15px;"><img src="'+image+'" width=50 height=50></div>'+
+									'<div class="col-xs-9" style="padding:0px; margin-top:10px; margin-right:10px;"><small><font color="MediumBlue">'+articles[i].titre+'</font></small></div>' +
+								'</div>' +
+								'<hr/ style="margin:0px;">' +
+								'<div class="row">'+
+									'<div id="collapse'+i+'" class="col-xs-12 accordian-body collapse container-fluid" style="text-align:justify; margin:5px; padding-right:30px; padding-left:20px;" onmouseover="this.style.cursor=\'default\'">'+
+										'<small><font color="#AAA">'+(articles[i].date).substring(0,10)+
+										'</font><br/>'+articles[i].description+'<br/>'+
+										'<a href="'+articles[i].lien+'" target="_blank" onmouseover="this.style.cursor=\'pointer\'"><font color="Orchid">Lire l\'article</font></a></small>'+
+										'<hr/ style="margin-top:6px; margin-bottom:-5px;">' +
+									'</div>'+
+								'</div>' +
+							'</div>';
+			}
+			document.getElementById('articles').innerHTML = output;
+		} else if (articles == "log out") {
 			window.location.assign("/acceuil.html");
-		} else if (r.resp == "no result") {
+		} else if (articles == "no result") {
 			alert("Aucun article correspondant");
-		} else if (r.resp) {
-			document.getElementById('articles').innerHTML = r.resp;
 		} else {
 			alert("Les articles n'ont pas pu être rafraichis");
 		}
+		background_color();
+	}
+};
+
+/* Propriété CSS */
+var background_color = function () {
+	var success = document.getElementsByClassName("positif");
+	for (a in success) {
+		success[a].onmouseover = function () { this.style.background  = "#b2dba1";};
+		success[a].onmouseout = function () { this.style.background  = "#d6e9c6";};
+	}
+	var danger = document.getElementsByClassName("negatif");
+	for (a in danger) {
+		danger[a].onmouseover = function () { this.style.background  = "#e7c3c3";};
+		danger[a].onmouseout = function () { this.style.background  = "#f2dede";};
+	}
+	var active = document.getElementsByClassName("alert-active");
+	for (a in active) {
+		active[a].onmouseover = function () { this.style.background  = "#d9edf7";};
+		active[a].onmouseout = function () { this.style.background  = "#fff";};
 	}
 };
 

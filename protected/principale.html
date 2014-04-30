@@ -42,9 +42,8 @@
 					<ul class="nav navbar-nav navbar-right">
 						<form class="navbar-form navbar-left" role="search">
 							<div class="form-group">
-								<input type="text" class="entreprise form-control" placeholder="Search">
+								<input id="search" type="text" class="entreprise form-control" placeholder="Search">
 							</div>
-							<button class="search btn btn-default" onclick="return false;">Rechercher</button>
 						</form>
 					</ul>
 				</div>				
@@ -61,7 +60,7 @@
 						<span>Entreprises</span>
 					</h4>
 				</div>
-				<div class="panel-body2" id="aff_ents">
+				<div class="panel-body2" id="aff_ents" style="line-height:3px;">
 					<!--<a href="#"><small><font color="Tomato">Une mauvaise entreprise</font></small></a><br/>
 					<a href="#"><small><font color="SteelBlue">Une entreprise neutre</font></small></a><br/>
 					<a href="#"><small><font color="SteelBlue">Et une autre</font></small></a><br/>
@@ -102,13 +101,13 @@
 					<!-- 2ème colonne : Chiffres -->
 					<div class="col-xs-4">
 						<hr/>
-							<strong><big>Cours<span class="pull-right">4431.81</span></big></strong><br/><br/>
-							<strong><big>Variation<font class="pull-right" color="Lime" size="5" style="margin-top:-8px">+0.59%</font></big></strong><br/>
+							<strong>Cours<big class="pull-right" style="margin-top:-2px;">4431.81</big></strong><br/><br/>
+							<strong>Variation<big class="pull-right"  style="margin-top:-2px; color:Lime;">+0.59%</big></strong><br/>
 						<hr/><br/>
-						<big>Ouverture<span class="pull-right">4412.41</span></big><br/>
-						<big>+ HAUT<span class="pull-right"><font color="MediumSeaGreen">4432.64</font></span></big><br/>
-						<big>+ BAS<span class="pull-right"><font color="Tomato">4392.06</font></span></big><br/>
-						<big>Clôture préc.<span class="pull-right">4405.66</span></big>
+						<span>Ouverture<span class="pull-right">4412.41</span></span><br/>
+						<span>+ HAUT<span class="pull-right"><font color="MediumSeaGreen">4432.64</font></span></span><br/>
+						<span>+ BAS<span class="pull-right"><font color="Tomato">4392.06</font></span></span><br/>
+						<span>Clôture préc.<span class="pull-right">4405.66</span></span>
 					</div>
 				</div>
 			</div>
@@ -123,11 +122,9 @@
 						<span class="glyphicon glyphicon-repeat pull-right"><style type="text/css">a:link{text-decoration:none}</style></span>
 					</h4>
 				</div>
-				<div class="panel-body1">
-					<table class="table table-hover">
-						<tbody id='articles'>
-						</tbody>
-					</table>
+				<div class="panel-body1" style="overflow-x: hidden;">
+					<div id='articles' class="row" style="background: white; margin-right:1px; margin-bottom:-1px;">
+					</div>
 				</div>
 			</div>
 		</div>
