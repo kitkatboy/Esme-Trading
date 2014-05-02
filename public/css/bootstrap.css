@@ -4776,7 +4776,7 @@ a.list-group-item-danger.active:focus {
   padding: 1px;
   margin-bottom: 1px;
   margin-left: 1px;
-  max-height: 763px;
+  max-height: 781px;
   overflow-y: auto;
   border-radius: 3px;
 }
@@ -4794,7 +4794,7 @@ a.list-group-item-danger.active:focus {
   padding: 5px;
   margin-right: 10px;
   margin-left: -19px;
-  height: 306px;
+  height: 315px;
   color: #fff;
  }
  /*--------------------------------------Modifiée----------------------------------*/
@@ -4803,6 +4803,16 @@ a.list-group-item-danger.active:focus {
   margin-left: 1px;
   margin-right: 1px;
   margin-bottom: 1px;
+  background-color: #fff;
+  border-radius: 2px;
+}
+/*--------------------------------------Modifiée----------------------------------*/
+.panel-body5 {
+  padding: 2px;
+  margin-left: 1px;
+  margin-right: 1px;
+  margin-bottom: 1px;
+  min-height: 205px;
   background-color: #fff;
   border-radius: 2px;
 }

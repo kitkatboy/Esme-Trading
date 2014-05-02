@@ -176,11 +176,13 @@ pri.load_courbe = function() {
 
 /* Fonction d'affichage de la courbe */
 pri.load_courbe_back = function() {
+
 	if (this.readyState == 4 && this.status == 200) {
 		//alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
-		if (r.resp) {
+		if (r.resp && r.resp.date) {
 			$(function () {
+				var highchartsOptions = Highcharts.setOptions(Highcharts.theme1);
 				$('#courbe').highcharts({
 					chart: {
 						zoomType: 'x',
@@ -238,17 +240,91 @@ pri.load_courbe_back = function() {
 					series: [{
 						type: 'area',
 						name: 'Cours',
-						pointInterval: 5 * 60 * 1000,
-						pointStart: Date.UTC(r.resp.date.annee, r.resp.date.mois, r.resp.date.jour),
-						data: r.resp.valeurs
+						//pointInterval: 5 * 60 * 1000,
+						//pointStart: Date.UTC(r.resp.date.annee, r.resp.date.mois, r.resp.date.jour),
+						data: /*r.resp.valeurs*/ [
+                    [Date.UTC(2014,  1,  01), 0.36   ],
+                    [Date.UTC(2014,  2, 01), 0.15],
+                    [Date.UTC(2014, 3, 01), 0.35],
+                    [Date.UTC(2014, 8, 01), 0.46],
+                    [Date.UTC(2014,  9, 01), 0.59]
+                ]
 					}]
 				});
 			});
 		} else {
-			alert("Les chiffres n'ont pas pu être chargés");
+			if (!r.resp.date) {
+				pri.load_courbe();
+				console.log("Les chiffres n'ont pas pu être chargés");
+			}
 		}
 	}
 };
+
+/* Fonction d'affichage cammembert Portefeuille */
+$(function () {
+    	
+	// Make monochrome colors and set them as default for all pies
+	Highcharts.getOptions().plotOptions.pie.colors = (function () {
+		var colors = [],
+			base = Highcharts.getOptions().colors[0],
+			i
+
+		for (i = 0; i < 10; i++) {
+			// Start out with a darkened base color (negative brighten), and end
+			// up with a much brighter color
+			colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
+		}
+		return colors;
+	}());
+	
+	// Build the chart
+	$('#cammembert').highcharts({
+		chart: {
+			plotBackgroundColor: null,
+			plotBorderWidth: null,
+			plotShadow: false
+		},
+		title: {
+			text: ''
+		},
+		tooltip: {
+			pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+		},
+		plotOptions: {
+			pie: {
+				allowPointSelect: true,
+				cursor: 'pointer',
+				dataLabels: {
+					enabled: true,
+					format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+					style: {
+						color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+					}
+				}
+			}
+		},
+		series: [{
+			type: 'pie',
+			name: 'Browser share',
+			data: [
+				['Firefox',   45.0],
+				['IE',       26.8],
+				{
+					name: 'Chrome',
+					y: 12.8,
+					sliced: true,
+					selected: true
+				},
+				['Safari',    8.5],
+				['Opera',     6.2],
+				['Others',   0.7]
+			]
+		}]
+	});
+});
+    
+
 	
 window.onload = function () {
     setTimeout(pri.init, 1);

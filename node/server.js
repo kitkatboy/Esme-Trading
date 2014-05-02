@@ -18,9 +18,11 @@ http.createServer(server.receive_request).listen(server.port, server.address);
 util.log("INFO - Demarrage du serveur, listening " + server.address + " : " + server.port);
 
 /* Appel des fonctions de récupération des données */
+/* Listeners */
+//recuperation_articles.evx.on("go", recuperation_articles.start());
 /*
 setInterval(function () {
-	recuperation_articles.start()
+	recuperation_articles.evx.emit("go");
 }, 5*1000);
 */
 //recuperation_articles.read();

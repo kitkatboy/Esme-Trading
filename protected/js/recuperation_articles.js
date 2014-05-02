@@ -6,10 +6,13 @@ var ev = new events.EventEmitter();
 var sqlite3 = require("sqlite3").verbose();
 var db = new sqlite3.Database("../protected/basearticle.db");
 
+exports.evx = new events.EventEmitter();
+
 var server = {};
-server.base = [];
+
 server.fe = 0;
 server.charge = 0;
+
 server.api = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%3D'http%3A%2F%2Fwww.investir.fr%2FRSS%2Fcac40.xml'&format=json&diagnostics=true";//&callback=cbfunc";
 
 server.dicoapp = {};
@@ -19,21 +22,13 @@ server.readdico = function(){
 	server.charge++;
 	fs.readFile("../protected/dico2.txt","UTF-8", function(e,d){
 		if(e) {
-			util.log("ERROR Dictionnaire 1 : " + e);
+			util.log("ERROR Dictionnaire principal : " + e);
 		} else if (d) {
 			server.dico = JSON.parse(d); // Chargement du dictionnaire de mots dans une variable
-			
-			util.log("Dictionnaire 1 charge");
-			server.charge--;
+			util.log("Dictionnaire principal charge");
+			//server.charge--;
 			ev.emit("ok");
-			//util.log(util.inspect(server.dico));
 		}
-		/*
-		var i=0;
-		for(i in server.dico){
-			i++;
-		}
-		*/
 	});
 	
 };
@@ -42,14 +37,13 @@ server.readdico2 = function(){
 	server.charge++;
 	fs.readFile("../protected/dicomulti.txt","UTF-8", function(e,d){
 		if(e) {
-			util.log("ERROR Dictionnaire 2 : " + e);
+			util.log("ERROR Dictionnaire adj : " + e);
 		} else if (d) {
 			server.dico2 = JSON.parse(d); // Chargement des adjectifs dans une variable
 			
-			util.log("Dictionnaire 2 charge");
-			server.charge--;
+			util.log("Dictionnaire adj charge");
+			//server.charge--;
 			ev.emit("ok");
-			//util.log(util.inspect(server.dico2));
 		}
 	});
 };
@@ -59,6 +53,7 @@ server.readbase = function(){
 	server.charge++;
 	var i = 0;
 	var stmt = "SELECT * FROM basearticle";
+	server.base = [];
     db.each(stmt, function (e, r) {
 		if(e){
 			util.log("ERROR Base de donnees : " + e);
@@ -66,15 +61,34 @@ server.readbase = function(){
 			server.base[i] = r;
 			i++;
 		}
-    });
-	util.log("Base de donnees charge");
-	server.charge--;
-	ev.emit("ok");	
+    },function(){
+		ev.emit("ok");
+		util.log("Base de donnees charge");
+		//util.log(r.titre);
+	});
+	
+	//server.charge--;
+		
+};
+
+server.readdicoapp = function(){
+	server.charge++;
+	fs.readFile("../protected/dicoapp.txt","UTF-8", function(e,d){
+		if(e) {
+			util.log("=(");
+		} else {
+			server.dicoapp = JSON.parse(d);
+			
+			util.log("dicoapp charge");
+			ev.emit("travailapp");
+			//util.log(util.inspect(server.dicoapp));
+		}
+	});
 };
 
 //Fonction de récupération des articles a partir du lien YQL
 server.get = function() {
-	if(server.charge == 0){
+	if(!--server.charge){
 		var b = "";
 		util.log("recuperation des articles depuis le lien YQL");
 		http.get(server.api, function (r) {
@@ -93,8 +107,8 @@ server.get = function() {
 
 //Fonction de mise en forme des articles
 server.mef = function(flux){
-	
 	var articles = [];
+	server.sem = 0;
 	util.log("mise en forme des articles recuperes");
 	//util.log(ev._events["test"]);
 	for (i in flux.query.results.item) {
@@ -105,19 +119,22 @@ server.mef = function(flux){
 		tmp.image = flux.query.results.item[i].enclosure;
 		tmp.lien = flux.query.results.item[i].link;
 		tmp.note=0;
-		articles[i] = tmp;
-		
+		//articles[i] = tmp;
+		//util.log(server.sem);
 		//util.log("Article recupere : " + tmp.titre);
 		if(tmp.description && tmp.titre){
 			//util.log("Fin de la mise en forme");
-			ev.emit("test",articles[i]);
+			//server.sem++;
+			
+			ev.emit("test",tmp);
+			
 		}
+		
     }
 };
 
 //Fonction de test des nouveaux articles
 server.test1 = function(article){
-
 	var titre;
 	var f = "ecris";
 	titre = article.titre.split(":");
@@ -125,6 +142,11 @@ server.test1 = function(article){
 	article.titre = titre[1];
 	
 	util.log("Comparaison avec la base de donnees : " + article.titre);
+	
+	util.log(server.sem);
+	/*if(!--server.sem){
+		ev.emit("cassetout");
+	}*/
 	
 	if (article.titre) {
 		do {
@@ -137,15 +159,16 @@ server.test1 = function(article){
 				util.log("Article deja enregistre : " + article.titre);
 				ev.emit("cassetout");
 				break;	
-			} else {
-				util.log("Nouvel article : " + article.titre);
 			}
 		}
 		ev.emit(f,article);
 	} else {
 		util.log("ERROR - Le titre de l'article n'est pas defini");
+		
 	}
+	
 };
+
 
 //Fonction de mise a jour de la base de donnée
 server.nouvdatabase = function(article){
@@ -170,6 +193,9 @@ server.write = function(article){
 			util.log("---------------- " + article.societe + "-" + article.titre);
 		}
 	});
+	if(!--server.sem){
+		ev.emit("cassetout");
+	}
 };
 
 bob = function(){
@@ -177,6 +203,7 @@ bob = function(){
 	ev.removeAllListeners();
 	//server.test1 = function(){};
 };
+
 
 //initialisation du dico
 server.addnote = function(){
@@ -223,27 +250,13 @@ server.writeapp = function(){
 	}
 };
 
-server.readdicoapp = function(){
-	server.charge++;
-	fs.readFile("../protected/dicoapp.txt","UTF-8", function(e,d){
-		if(e) {
-			util.log("=(");
-		} else {
-			server.dicoapp = JSON.parse(d);
-			
-			util.log("dicoapp charge");
-			ev.emit("travailapp");
-			//util.log(util.inspect(server.dicoapp));
-		}
-	});
-};
 
 server.prepareapp = function(){
 	 for(i in server.dicoapp){
 		server.dicoapp[i].coef = server.dicoapp[i].note/(server.dicoapp[i].nb*10);
 	}
 	//util.log(util.inspect(server.dicoapp));
-	server.charge--;
+	//server.charge--;
 	ev.emit("ok");
 };
 
@@ -305,38 +318,46 @@ exports.read = function () {
 		} else if (r) {
 			//tmp[i] =  r;
 			//i++;
-			util.log(util.inspect(r));
+			util.log(r.titre);
 		}
     });
     //db.close();
 };
+
+exports.start = function () {
+	//server.initlisner(); // Initialisation de tous les listener
+	//var a = ev.listeners();
+	ev.removeAllListeners();
+	exports.initlisner();
+	ev.emit("read"); // Lancement du processus
+};
+
 //fonction d'initialisation des lisner
-server.initlisner = function(){
+exports.initlisner = function(){
 	//server.f = 0;
-	ev.once("read",server.readdico);
-	ev.once("read",server.readdico2);
-	ev.once("read",server.readbase);
-	//ev.once("read",server.get);
+	//server.sem =0;
+	ev.on("read",server.readdico);
+	ev.on("read",server.readdico2);
+	ev.on("read",server.readbase);
+	ev.on("read",server.readdicoapp);
+	
 	ev.on("ok",server.get);
-	//ev.on("ok",server.testemit);
+	
 	ev.on("test",server.test1);
-	//ev.on("ecris",server.note22);
+	
 	ev.on("miseajourdatabase",server.nouvdatabase);
 	ev.on("cassetout",bob);
 	
-	ev.once("read",server.readdicoapp);
 	ev.on("apprend",server.app);
 	ev.on("ecris",server.note23);
 	ev.on("travailapp",server.prepareapp);
 	ev.on("ecritlapp",server.writeapp);
-	//ev.on("ecris",server.note2);
+	//exports.evx.on("go",exports.start);
 	util.log("Les listener sont initialises");
 	
 };
-exports.start = function () {
-	server.initlisner(); // Initialisation de tous les listener
-	ev.emit("read"); // Lancement du processus
-};
+
+
 
 //exports.create();
 //server.addnote();

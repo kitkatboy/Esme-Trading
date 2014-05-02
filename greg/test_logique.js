@@ -26,26 +26,24 @@ var triAnsemble = function(borne1, borne2, val){
 
 	var res = {};
 	var borne0 = (borne2+borne1)/2;
-	var coef_dirrecteur1 = -1/(borne0-borne1);
-	var coef_dirrecteur2 = 1/(borne0-borne1);
-	var coef_dirrecteur3 = -1/(borne2-borne0);
-	var coef_dirrecteur4 = 1/(borne2-borne0);
+	
+	var a1 = 1/(borne0-borne1);
+	var a2 = 1/(borne2-borne0);
 
 	if(val <= borne1){
-
-		res.e2 =0;
 		res.e1=1;
+		res.e2 =0;
 		res.e3 = 0;
 	}else if(val > borne1 && val < borne0){
 
-		res.e1 = val*(coef_dirrecteur1);
-		res.e2 = val*(coef_dirrecteur2)+1;
+		res.e2 = a1*(val-borne1);
+		res.e1 = 1 - res.e2;
 		res.e3 = 0;
 	}else if(val > borne0 && val < borne2){
 
 		res.e1 = 0;
-		res.e2 = val*(coef_dirrecteur3)+1;
-		res.e3 = val*(coef_dirrecteur4);
+		res.e3 = a2*(val-borne0);
+		res.e2 = 1 - res.e3;
 	}else if(val >= borne2){
 
 		res.e1 = 0;
@@ -105,5 +103,12 @@ var logique = function(note,date){
 };
 
 logique(3,2);
-
+/*
+for(var i = -6 ; i<=6;i++)
+{
+	util.log(i);
+	triAnsemble(-2,5,i);
+};
+*/
+//triAnsemble(-5,5,i);
 //console.log(triAnsemble(-5, 5, 2));

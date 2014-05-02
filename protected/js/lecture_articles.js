@@ -14,7 +14,7 @@ server.articles = [];
 server.readbase = function(/*entreprise*/) {
 	var i = 0;
 	//if(entreprise == "all"){
-		var stmt = "SELECT * FROM basearticle";
+		var stmt = "SELECT * FROM basearticle ORDER BY date";
 	/*} else {
 		var stmt = "SELECT * FROM basearticle WHERE entreprise = '" + entreprise + " '";
 	}*/
@@ -33,7 +33,13 @@ server.readbase = function(/*entreprise*/) {
 						server.base[i] = r;
 						i++;
 					}
-				});
+				});/*
+				setTimeout(function () {
+					//console.log("----------------------------- lalala");
+					server.readarticle();
+				}, 2)*/
+				
+				
 			/*} else {
 				server.that[server.fonc]("no result");
 				ev._events = {};
@@ -43,20 +49,27 @@ server.readbase = function(/*entreprise*/) {
 };
 
 server.readarticle = function(entreprise, titre) {
-	if (entreprise && titre) {
-		fs.readFile("../protected/articlesfr/"+entreprise.substring(0, entreprise.length - 1)+" - "+titre.substring(1)+".txt","UTF-8", function (e,d){
-			if (e) {
-				server.fe --;
-				util.log(e);
+	//if (server.base.length != 0) {
+		//for (var i = 0; i < server.base.length; i++) {
+			//console.log("------" + server.base[i].entreprise + " ----- " + server.base[i].titre);
+			if (entreprise && titre) {
+				fs.readFile("../protected/articlesfr/"+entreprise.substring(0, entreprise.length - 1)+" - "+titre.substring(1)+".txt","UTF-8", function (e,d){
+					if (e) {
+						server.fe --;
+						util.log(e);
+					} else {
+						var article = JSON.parse(d);
+						ev.emit("ecris", article);
+					}
+				});
 			} else {
-				var article = JSON.parse(d);
-				ev.emit("ecris", article);
+				server.fe --;
+				util.log("INFO : Nom de l'entreprise ou titre de l'article manquant");
 			}
-		});
-	}else{
-		server.fe --;
-		util.log("INFO : Nom de l'entreprise ou titre de l'article manquant");
-	}
+		//}
+	/*} else {
+		util.log("INFO : Les articles n'ont pas pu etre charges");
+	}*/
 };
 
 server.envoi = function(article){
