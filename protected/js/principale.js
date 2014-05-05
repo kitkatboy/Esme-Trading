@@ -2,6 +2,7 @@ var pri = {};
 // pri.jour = 1;
 // pri.semaine = 7;
 // pri.mois = 30;
+pri.name_ent = "";
 pri.interv_search;
 
 
@@ -26,8 +27,17 @@ pri.on_click = function (ev) {
 		pri.send_post1();
 	} else if (src.has_class("courbe_societe")) {
 		// appel des informations par société
-		pri.load_courbe(src.innerHTML);
-		pri.logique(src.innerHTML);
+		if (src.innerHTML == "CAC 40") {
+			pri.name_ent = "";
+		} else {
+			pri.name_ent = src.innerHTML;
+		}
+		
+		if (pri.name_ent) {
+			pri.logique();
+		}
+		
+		pri.load_courbe();
 	} else if (src.has_class("raf_actu")) {
 		// Rafraichissement du flux d'actualité
 		pri.load_art()
@@ -83,10 +93,8 @@ pri.search = function () {
 }
 
 pri.load_art = function () {
-	/*var entreprise = document.getElementsByClassName("entreprise")[0].value;*/
-	
 	// Création d'un objet contenant les données
-    var data = {act: "chargement_articles"/*, search: entreprise*/};
+    var data = {act: "chargement_articles"};
 	client.post(data, pri.load_articles_back);
 };
 
@@ -160,10 +168,8 @@ var background_color = function () {
 };
 
 pri.load_ents = function() {
-	//var entreprise = document.getElementsByClassName("entreprise")[0].value;
-	
 	// Création d'un objet contenant les données
-    var data = {act: "chargement_entreprises"/*, search: entreprise*/};
+    var data = {act: "chargement_entreprises"};
 	client.post(data, pri.load_ents_back);
 };
 
@@ -175,6 +181,7 @@ pri.load_ents_back = function () {
 		var output = "";
 		var tmp = "";
 		if (r.resp) {
+			output += '<span onmouseover="this.style.cursor=\'pointer\'"><big><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">CAC 40</li></font></big></span><br/>';
 			for(i in r.resp.nom) {
 				output += '<span onmouseover="this.style.cursor=\'pointer\'"><small><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">'+r.resp.nom[i].name+'</li></font></small></span><br/>';
 			}
@@ -186,9 +193,10 @@ pri.load_ents_back = function () {
 	}
 };
 
-pri.load_courbe = function(entreprise) {
+pri.load_courbe = function() {
+	// console.log("----" + pri.name_ent);
 	// Création d'un objet contenant les données
-	var data = {act: "chargement_courbe", search: entreprise};
+	var data = {act: "chargement_courbe", search: pri.name_ent};
 	client.post(data, pri.load_courbe_back);
 };
 
@@ -203,6 +211,11 @@ pri.load_courbe_back = function() {
 		/*for (var i = 0; i < r.resp.length; i++) {
 			output.push(JSON.parse(r.resp[i]));
 		}*/
+		
+		if (pri.name_ent == "") {
+			pri.name_ent = "Cac 40";
+		}
+		
 		for(var i = 0; i < r.resp.length; i++)
 		{
 			output[i] = {};
@@ -237,7 +250,7 @@ pri.load_courbe_back = function() {
 							spacingRight: 20
 						},
 						title: {
-							text: 'Cac 40'
+							text: pri.name_ent
 						},
 						subtitle: {
 							text: document.ontouchstart === undefined ?
@@ -308,9 +321,10 @@ pri.load_courbe_back = function() {
 	}
 };
 
-pri.logique = function(entreprise) {
+pri.logique = function() {
+	// console.log("----" + pri.name_ent);
 	// Création d'un objet contenant les données
-	var data = {act: "logique_flou", search: entreprise};
+	var data = {act: "logique_flou", search: pri.name_ent};
 	client.post(data, pri.logique_back);
 };
 
@@ -320,6 +334,14 @@ pri.logique_back = function() {
 		var r = JSON.parse(this.responseText);
 		console.log(r.resp.jour);
 		console.log(r.resp.semaine);
+		
+		/*
+		<p><font color="green">pri.name_ent : </font></p>
+		<p><font color="blue">Prévision à la journée : </font>Investissez dans cette société.</p>
+		<p><font color="blue">Prévision à la semaine : </font>Vendez vos actions de cette société.</p>
+			*/		
+					
+					
 		/*
 		var output = "";
 		var tmp = "";
@@ -328,7 +350,7 @@ pri.logique_back = function() {
 				output += '<span onmouseover="this.style.cursor=\'pointer\'"><small><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">'+r.resp.nom[i].name+'</li></font></small></span><br/>';
 			}
 			
-			document.getElementById('aff_ents').innerHTML = output;
+			document.getElementById('logique').innerHTML = output;
 		} else {
 			alert("Les entreprises n'ont pas pu être chargées");
 		}*/
