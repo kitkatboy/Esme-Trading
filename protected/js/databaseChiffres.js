@@ -5,7 +5,6 @@ var event = require('events');
 var ev = new event.EventEmitter();
 var fs = require('fs');
 
-
 exports.create = function () {
 	db.run("CREATE TABLE databaseChiffres (value TEXT, date TEXT)");
 	console.log("database creer");
@@ -22,85 +21,80 @@ var new_date = new Date();
 };
 
 exports.readAll = function (that, fonc) {
-	var a = new Array();
-	var date = {};
-	var jour = 0;
-	var mois = 0;
-	var annee = 0;
-	var dd;
-	var mm;
-	var yyyy;
-	var output = {};
-    var stmt = "SELECT MAX(date) FROM databaseChiffres";
+	var b = "";
+	var output =[];
+	var c = new Array();
+	var nbr = 0;
+	var day = 0;
+	// var save = [];
+	var j = 0;
+	var k = 0;
+	var day = 0;
+	stmt = "SELECT date, value FROM databaseChiffres ORDER BY date";
     db.each(stmt, function (e, r) {
-		if (e) {
-			util.log("ERROR : " + e);
-		}else if (r) {
-			jour = r['MAX(date)'];
-			jour = parseInt(jour);
-			jour = new Date(jour);
-			mm = jour.getMonth();
-			dd = jour.getDay();
-			yyyy = jour.getFullYear();
-			date.annee = yyyy;
-			date.mois = mm;
-			date.jour = dd;
-			output.date=date;
-		}
-    });
-	stmt = "SELECT value FROM databaseChiffres ";
-    db.each(stmt, function (e, r) {
-		if (e) {
-			util.log("ERROR : " + e);
-		} else if (r) {
-			a.push(parseFloat(r.value));
-		}}, 
+			if (e) {
+				util.log("ERROR : " + e);
+			} else if (r) {
+				c.push(parseFloat(r.date) + 2*60*60*1000);
+				c.push(parseFloat(r.value));
+				nbr++;
+			}
+		}, 
 		function () {
-			output.valeurs=a;
+		var b ="";
+			for(var i=0; i < 2*nbr; i++) 
+			{
+				b+= "["+c[i]+",  "+c[i+1]+"], "; //todo enlever le new date 
+				j++;
+				if((c[i+2]- c[i]) > 10*60*60*1000){ //TODO 
+					b = b.substring(0,  b.length-2);	
+					output[day]= "["+b+"]";
+					day++;
+					var b ="";		
+				}
+				i++;
+			}
+			b = b.substring(0,  b.length-2);
+			output[day]="["+b+"]";
+			// console.log(JSON.parse(output[0]));
 			that[fonc](output);
-		});
+		}
+	);	
 };
 
 
 exports.getName=function(that, fonc){
 	var output = "";
-	fs.readFile('../protected/js/entreprises_cac40.js', 'utf-8', function (err, data) {
+	fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) {
 		if(err) {
 			console.log(err);
 		} else if (data) {
-		data = JSON.parse(data);
-			for(i=0; i<data.nom.length; i++) {
-				output += '<a href="#" id="'+data.nom[i].name+'"><small><font color="SteelBlue"><li style="line-height:15px;">'+data.nom[i].name+'</li></font></small></a><br/>';
-			} 
+			data = JSON.parse(data); 
 		} else {
 			that[fonc]("no result");	
 		}	
-		that[fonc](output);
+		that[fonc](data);
 	});
-}
+};
 //exports.getName(null, null);
 //exports.readAll(null, null);
-/*exports.readWeek = function (that, fonc) { // renvoie les valeurs sur une semaine
-a= new Date();
-aujourdhui = a.valueOf();
-semaine= aujourdhui-604800000;
-aujourdhui = "'"+aujourdhui+"'";
-semaine= "'"+semaine+"'";
-console.log("ajd " + aujourdhui);
-console.log("sem " +  semaine);
-    var stmt = "SELECT value FROM databaseChiffres WHERE date BETWEEN"+ semaine +"AND"+ aujourdhui;
+
+/*
+exports.readWeek = function () { // renvoie les valeurs sur une semaine
+    var stmt = "SELECT date FROM databaseChiffres" ;
 	var a = new Array();
     db.each(stmt, function (e, r) {
 		//console.log(util.inspect(r));
-		a.push(r.value);
+		a.push(parseFloat(r.date));
 		
     }, function () {
 		//ev.emit("go", a, that, fonc);
-		console.log(util.inspect(a));
-	});
+		console.log(new Date(a[0]));
+		console.log(new Date(a[a.length - 1]));
+	})
 	
-}; */
-
+};*/
+//exports.readWeek(); 
 //exports.create();
 //exports.insert({"valeur" : "46"});
 //exports.readAll(null, null);

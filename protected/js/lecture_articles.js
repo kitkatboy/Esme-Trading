@@ -14,7 +14,7 @@ server.articles = [];
 server.readbase = function(/*entreprise*/) {
 	var i = 0;
 	//if(entreprise == "all"){
-		var stmt = "SELECT * FROM basearticle ORDER BY date";
+		var stmt = "SELECT * FROM basearticle";
 	/*} else {
 		var stmt = "SELECT * FROM basearticle WHERE entreprise = '" + entreprise + " '";
 	}*/

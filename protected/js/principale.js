@@ -1,4 +1,7 @@
 var pri = {};
+// pri.jour = 1;
+// pri.semaine = 7;
+// pri.mois = 30;
 pri.interv_search;
 
 
@@ -9,15 +12,25 @@ pri.init = function () {
 	pri.load_art();
 	pri.load_ents();
 	pri.load_courbe();
+	
+	// Recherche dynamique par chaîne de caractères dans les articles
 	document.getElementById("search").onfocus = function (){pri.interv_search = setInterval(pri.search, 10);};
-	document.getElementById("search").onblur = function () {clearInterval(pri.interv_search)};
+	document.getElementById("search").onblur = function () {clearInterval(pri.interv_search);};
 };
 
 pri.on_click = function (ev) {
-	// .target désigne la cible(le noeud DOM) concerné par le chang. d'état sur événement "click" (ici balises <div>)
+	// .target désigne la cible(le noeud DOM) concerné par le chang. d'état sur événement "click"
     var src = ev.target;
 	if (src.has_class("post1")) {
+		// bouton deconnexion
 		pri.send_post1();
+	} else if (src.has_class("courbe_societe")) {
+		// appel des informations par société
+		pri.load_courbe(src.innerHTML);
+		pri.logique(src.innerHTML);
+	} else if (src.has_class("raf_actu")) {
+		// Rafraichissement du flux d'actualité
+		pri.load_art()
 	}
 };
 
@@ -156,108 +169,169 @@ pri.load_ents = function() {
 
 pri.load_ents_back = function () {
 	if (this.readyState == 4 && this.status == 200) {
-		//alert("this : " + this.responseText);
+		// alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
+		// console.log(r);
+		var output = "";
+		var tmp = "";
 		if (r.resp) {
-			document.getElementById('aff_ents').innerHTML = r.resp;
+			for(i in r.resp.nom) {
+				output += '<span onmouseover="this.style.cursor=\'pointer\'"><small><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">'+r.resp.nom[i].name+'</li></font></small></span><br/>';
+			}
+			
+			document.getElementById('aff_ents').innerHTML = output;
 		} else {
 			alert("Les entreprises n'ont pas pu être chargées");
 		}
 	}
 };
 
-pri.load_courbe = function() {
-	//var entreprise = document.getElementsByClassName("entreprise")[0].value;
-	
+pri.load_courbe = function(entreprise) {
 	// Création d'un objet contenant les données
-    var data = {act: "chargement_courbe"/*, search: entreprise*/};
+	var data = {act: "chargement_courbe", search: entreprise};
 	client.post(data, pri.load_courbe_back);
 };
 
 /* Fonction d'affichage de la courbe */
 pri.load_courbe_back = function() {
-
 	if (this.readyState == 4 && this.status == 200) {
 		//alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
-		if (r.resp && r.resp.date) {
-			$(function () {
-				var highchartsOptions = Highcharts.setOptions(Highcharts.theme1);
-				$('#courbe').highcharts({
-					chart: {
-						zoomType: 'x',
-						spacingRight: 20
-					},
-					title: {
-						text: 'Cac 40'
-					},
-					subtitle: {
-						text: document.ontouchstart === undefined ?
-							'Cliquez et glissez pour zoomer' :
-							'Pincez pour zoomer'
-					},
-					xAxis: {
-						type: 'datetime',
-						maxZoom: 5 * 60 * 1000, // cinq minutes
-						title: {
-							text: null
-						}
-					},
-					yAxis: {
-						title: {
-							text: 'Cours'
-						}
-					},
-					tooltip: {
-						shared: true
-					},
-					legend: {
-						enabled: false
-					},
-					plotOptions: {
-						area: {
-							fillColor: {
-								linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
-								stops: [
-									[0, Highcharts.getOptions().colors[0]],
-									[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-								]
-							},
-							lineWidth: 1,
-							marker: {
-								enabled: false
-							},
-							shadow: false,
-							states: {
-								hover: {
-									lineWidth: 1
-								}
-							},
-							threshold: null
-						}
-					},
-
-					series: [{
-						type: 'area',
-						name: 'Cours',
-						//pointInterval: 5 * 60 * 1000,
-						//pointStart: Date.UTC(r.resp.date.annee, r.resp.date.mois, r.resp.date.jour),
-						data: /*r.resp.valeurs*/ [
-                    [Date.UTC(2014,  1,  01), 0.36   ],
-                    [Date.UTC(2014,  2, 01), 0.15],
-                    [Date.UTC(2014, 3, 01), 0.35],
-                    [Date.UTC(2014, 8, 01), 0.46],
-                    [Date.UTC(2014,  9, 01), 0.59]
-                ]
-					}]
-				});
-			});
-		} else {
-			if (!r.resp.date) {
-				pri.load_courbe();
-				console.log("Les chiffres n'ont pas pu être chargés");
+		var output = [];
+		// alert(r.resp);
+		// var r = JSON.parse(this.responseText);
+		/*for (var i = 0; i < r.resp.length; i++) {
+			output.push(JSON.parse(r.resp[i]));
+		}*/
+		for(var i = 0; i < r.resp.length; i++)
+		{
+			output[i] = {};
+			output[i].type = 'area';
+			output[i].data = new Array();
+			tmp = JSON.parse(r.resp[i]);
+			for(j in tmp)
+			{
+				output[i].data.push(tmp[j]);
 			}
 		}
+		// console.log(typeof output);
+		// console.log(output);
+		
+		// output = JSON.parse(r.resp[0]);
+		
+		if (r.resp) {
+			// for (var i = 0 ; i < r.resp.length; i++) {
+				// output += r.resp[i];
+			// }
+			// console.log(new Date(output[0][0]));
+			
+			// Fonction Highcharts. Le setTimeout permet de traiter la partie graphique après celle des données -> en même tps cela créer des pb d'affichage
+			setTimeout(function () {
+				$(function () {
+					//alert(output);
+					// console.log("------------------------ " + output);
+					var highchartsOptions = Highcharts.setOptions(Highcharts.theme1);
+					$('#courbe').highcharts({
+						chart: {
+							zoomType: 'x',
+							spacingRight: 20
+						},
+						title: {
+							text: 'Cac 40'
+						},
+						subtitle: {
+							text: document.ontouchstart === undefined ?
+								'Cliquez et glissez pour zoomer' :
+								'Pincez pour zoomer'
+						},
+						xAxis: {
+							type: 'datetime',
+							maxZoom: 5 * 60 * 1000, // cinq minutes
+							title: {
+								text: null
+							}
+						},
+						yAxis: {
+							title: {
+								text: 'Cours'
+							}
+						},
+						tooltip: {
+							shared: true
+						},
+						legend: {
+							enabled: false
+						},
+						plotOptions: {
+							area: {
+								fillColor: {
+									linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+									stops: [
+										[0, Highcharts.getOptions().colors[0]],
+										[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+									]
+								},
+								lineWidth: 1,
+								marker: {
+									enabled: false
+								},
+								shadow: false,
+								states: {
+									hover: {
+										lineWidth: 1
+									}
+								},
+								threshold: null
+							}
+						},
+
+						series: output//[{
+							//type: 'area',
+							// name: 'Cours',
+							//pointInterval: 5 * 60 * 1000,
+							//pointStart: Date.UTC(r.resp.date.annee, r.resp.date.mois, r.resp.date.jour),
+							//data: output
+							// [
+								// [Date.UTC(2014,  1,  01), 0.36],
+								// [Date.UTC(2014,  2, 01), 0.15],
+								// [Date.UTC(2014, 3, 01), 0.35],
+								// [Date.UTC(2014, 8, 01), 0.46],
+								// [Date.UTC(2014,  9, 01), 0.59]
+							// ]
+						//}]
+					});
+				})},1);
+		} else {
+			pri.load_courbe();
+			console.log("Les chiffres n'ont pas pu être chargés");
+		}
+	}
+};
+
+pri.logique = function(entreprise) {
+	// Création d'un objet contenant les données
+	var data = {act: "logique_flou", search: entreprise};
+	client.post(data, pri.logique_back);
+};
+
+pri.logique_back = function() {
+	if (this.readyState == 4 && this.status == 200) {
+		// alert("this : " + this.responseText);
+		var r = JSON.parse(this.responseText);
+		console.log(r.resp.jour);
+		console.log(r.resp.semaine);
+		/*
+		var output = "";
+		var tmp = "";
+		if (r.resp) {
+			for(i in r.resp.nom) {
+				output += '<span onmouseover="this.style.cursor=\'pointer\'"><small><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">'+r.resp.nom[i].name+'</li></font></small></span><br/>';
+			}
+			
+			document.getElementById('aff_ents').innerHTML = output;
+		} else {
+			alert("Les entreprises n'ont pas pu être chargées");
+		}*/
 	}
 };
 

@@ -1,6 +1,8 @@
 var database = require('./database.js');
 var lecture_articles = require('./lecture_articles.js');
 var databaseChiffres = require('./databaseChiffres.js');
+var databaseEntreprises = require('./databaseEntreprises.js');
+var logique = require('./logique.js');
 
 exports.postReq = function(paquets, req, resp) {
 	console.log("Reception paquets : " + JSON.stringify(paquets));
@@ -17,6 +19,8 @@ exports.postReq = function(paquets, req, resp) {
 	} else if (paquets.act == "chargement_entreprises") {
 		traitement_post.check_log();
 	} else if (paquets.act == "chargement_courbe") {
+		traitement_post.check_log();
+	} else if (paquets.act == "logique_flou") {
 		traitement_post.check_log();
 	} else {
 		traitement_post.reponse("Un problème est survenu lors du traitement de la requête");
@@ -36,7 +40,7 @@ constr_post_acceuil = function (paquets, req, resp) {
 		this.mdp = paquets.mdp;
 		this.log_temp = paquets.log_temp;
 		this.act = paquets.act;
-		//this.search = paquets.search;
+		this.search = paquets.search;
 	} else {
 		console.log("ERROR - L'\objet POST n\'a pas pu etre construit.");
 		return;
@@ -92,8 +96,21 @@ chargement_entreprises:
 	
 chargement_courbe:
 	function () {
-		console.log("Chargement de la courbe"/* + this.search*/); //TO DO--------------
-		databaseChiffres.readAll(this, "reponse"/*, this.search*/);
+		if (!this.search) {
+			console.log("Chargement de la courbe du cac40");
+			databaseChiffres.readAll(this, "reponse");
+		
+		} else {
+			console.log("Chargement de la courbe : " + this.search); //TO DO--------------
+			databaseEntreprises.readAll(this, "reponse", this.search);
+			
+		}
+	},
+	
+logique_flou:
+	function () {
+		console.log("--------------- Appel logique flou entreprise : " + this.search);
+		logique.texist(this, "reponse", this.search);
 	},
 
 reponse:
