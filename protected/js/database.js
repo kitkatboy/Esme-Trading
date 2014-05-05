@@ -73,12 +73,12 @@ exports.verifLogin = function (obj, fonction) {
 
 exports.checkDatabase = function (obj, function1, function2) {
 	var log_temp = obj.req.headers.cookie;
-	console.log("Identifiant temporaire : " + log_temp);	
+	util.log("Identifiant temporaire : " + log_temp);	
 	db.serialize(function () {
 		var new_date = new Date();
 		var stmt = "SELECT * FROM database WHERE log_temp = " + log_temp;
 		db.get(stmt, function (e, r) {
-			//console.log("-----------------------" + util.inspect(r));
+			//util.log("-----------------------" + util.inspect(r));
 			if (r) {
 				if (((new_date.valueOf() - r.date)/(1000)) < 3*60) {
 					util.log("Actualisation de la date du login temporaire");

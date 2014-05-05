@@ -1,8 +1,7 @@
 var pri = {};
-// pri.jour = 1;
-// pri.semaine = 7;
-// pri.mois = 30;
-pri.name_ent = "";
+pri.tps = 0;
+pri.name_ent = "CAC 40";
+pri.donnes_courbe = [];
 pri.interv_search;
 
 
@@ -27,20 +26,17 @@ pri.on_click = function (ev) {
 		pri.send_post1();
 	} else if (src.has_class("courbe_societe")) {
 		// appel des informations par société
-		if (src.innerHTML == "CAC 40") {
-			pri.name_ent = "";
-		} else {
-			pri.name_ent = src.innerHTML;
-		}
+		pri.name_ent = src.innerHTML;
+		pri.load_courbe();
 		
 		if (pri.name_ent) {
 			pri.logique();
 		}
-		
-		pri.load_courbe();
 	} else if (src.has_class("raf_actu")) {
 		// Rafraichissement du flux d'actualité
 		pri.load_art()
+	} else if (src.has_class("tps_courbe")) {
+		pri.tps_courbe(src.innerHTML);
 	}
 };
 
@@ -63,6 +59,7 @@ pri.search = function () {
 	var i = 0;
 	var entreprise = document.getElementsByClassName("entreprise")[0].value.toLowerCase();
 	var article = document.getElementById("article"+i);
+	// setInterval(console.log(entreprise),1);
 	
 	while (article) {
 		if (entreprise) {
@@ -195,8 +192,14 @@ pri.load_ents_back = function () {
 
 pri.load_courbe = function() {
 	// console.log("----" + pri.name_ent);
-	// Création d'un objet contenant les données
-	var data = {act: "chargement_courbe", search: pri.name_ent};
+	var data = {};
+	
+	if (pri.name_ent == "CAC 40") {
+		data = {act: "chargement_courbe"};
+	} else {
+		// Création d'un objet contenant les données
+		data = {act: "chargement_courbe", search: pri.name_ent};
+	}
 	client.post(data, pri.load_courbe_back);
 };
 
@@ -205,115 +208,13 @@ pri.load_courbe_back = function() {
 	if (this.readyState == 4 && this.status == 200) {
 		//alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
-		var output = [];
-		// alert(r.resp);
-		// var r = JSON.parse(this.responseText);
-		/*for (var i = 0; i < r.resp.length; i++) {
-			output.push(JSON.parse(r.resp[i]));
-		}*/
 		
-		if (pri.name_ent == "") {
-			pri.name_ent = "Cac 40";
-		}
-		
-		for(var i = 0; i < r.resp.length; i++)
-		{
-			output[i] = {};
-			output[i].type = 'area';
-			output[i].data = new Array();
-			tmp = JSON.parse(r.resp[i]);
-			for(j in tmp)
-			{
-				output[i].data.push(tmp[j]);
-			}
-		}
-		// console.log(typeof output);
-		// console.log(output);
-		
-		// output = JSON.parse(r.resp[0]);
-		
-		if (r.resp) {
-			// for (var i = 0 ; i < r.resp.length; i++) {
-				// output += r.resp[i];
-			// }
-			// console.log(new Date(output[0][0]));
-			
-			// Fonction Highcharts. Le setTimeout permet de traiter la partie graphique après celle des données -> en même tps cela créer des pb d'affichage
-			setTimeout(function () {
-				$(function () {
-					//alert(output);
-					// console.log("------------------------ " + output);
-					var highchartsOptions = Highcharts.setOptions(Highcharts.theme1);
-					$('#courbe').highcharts({
-						chart: {
-							zoomType: 'x',
-							spacingRight: 20
-						},
-						title: {
-							text: pri.name_ent
-						},
-						subtitle: {
-							text: document.ontouchstart === undefined ?
-								'Cliquez et glissez pour zoomer' :
-								'Pincez pour zoomer'
-						},
-						xAxis: {
-							type: 'datetime',
-							maxZoom: 5 * 60 * 1000, // cinq minutes
-							title: {
-								text: null
-							}
-						},
-						yAxis: {
-							title: {
-								text: 'Cours'
-							}
-						},
-						tooltip: {
-							shared: true
-						},
-						legend: {
-							enabled: false
-						},
-						plotOptions: {
-							area: {
-								fillColor: {
-									linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
-									stops: [
-										[0, Highcharts.getOptions().colors[0]],
-										[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-									]
-								},
-								lineWidth: 1,
-								marker: {
-									enabled: false
-								},
-								shadow: false,
-								states: {
-									hover: {
-										lineWidth: 1
-									}
-								},
-								threshold: null
-							}
-						},
-
-						series: output//[{
-							//type: 'area',
-							// name: 'Cours',
-							//pointInterval: 5 * 60 * 1000,
-							//pointStart: Date.UTC(r.resp.date.annee, r.resp.date.mois, r.resp.date.jour),
-							//data: output
-							// [
-								// [Date.UTC(2014,  1,  01), 0.36],
-								// [Date.UTC(2014,  2, 01), 0.15],
-								// [Date.UTC(2014, 3, 01), 0.35],
-								// [Date.UTC(2014, 8, 01), 0.46],
-								// [Date.UTC(2014,  9, 01), 0.59]
-							// ]
-						//}]
-					});
-				})},1);
+		if (typeof r.resp == "object") {
+			pri.donnes_courbe = r.resp;
+			pri.tps = 1;
+			pri.affichage_courbe();
+		} else if (r.resp == "log out") {
+			window.location.assign("/acceuil.html");
 		} else {
 			pri.load_courbe();
 			console.log("Les chiffres n'ont pas pu être chargés");
@@ -321,11 +222,102 @@ pri.load_courbe_back = function() {
 	}
 };
 
+pri.tps_courbe = function(demande) {
+	if (demande == "Jour") {
+		pri.tps = 1;
+	} else if (demande == "Semaine") {
+		pri.tps = 7;
+	} else {
+		pri.tps = 30;
+	}
+	pri.affichage_courbe();
+};
+
+pri.affichage_courbe = function () {
+	var output = [];
+	
+	if (pri.tps >= pri.donnes_courbe.length) {
+		pri.tps = pri.donnes_courbe.length;
+	}
+	
+	for(var i = 0; i < pri.tps; i++)
+	{
+		output[i] = {};
+		output[i].type = 'area';
+		output[i].data = new Array();
+		tmp = JSON.parse(pri.donnes_courbe[i]);
+		for (j in tmp) {
+			output[i].data.push(tmp[j]);
+		}
+	}
+	
+	$(function () {
+		var highchartsOptions = Highcharts.setOptions(Highcharts.theme1);
+		$('#courbe').highcharts({
+			chart: {
+				zoomType: 'x',
+				spacingRight: 20
+			},
+			title: {
+				text: pri.name_ent
+			},
+			subtitle: {
+				text: document.ontouchstart === undefined ?
+					'Cliquez et glissez pour zoomer' :
+					'Pincez pour zoomer'
+			},
+			xAxis: {
+				type: 'datetime',
+				maxZoom: 5 * 60 * 1000, // cinq minutes
+				title: {
+					text: null
+				}
+			},
+			yAxis: {
+				title: {
+					text: 'Cours'
+				}
+			},
+			tooltip: {
+				shared: true
+			},
+			legend: {
+				enabled: false
+			},
+			plotOptions: {
+				area: {
+					fillColor: {
+						linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+						stops: [
+							[0, Highcharts.getOptions().colors[0]],
+							[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+						]
+					},
+					lineWidth: 1,
+					marker: {
+						enabled: false
+					},
+					shadow: false,
+					states: {
+						hover: {
+							lineWidth: 1
+						}
+					},
+					threshold: null
+				}
+			},
+
+			series: output
+		});
+	});
+};
+
 pri.logique = function() {
-	// console.log("----" + pri.name_ent);
-	// Création d'un objet contenant les données
-	var data = {act: "logique_flou", search: pri.name_ent};
-	client.post(data, pri.logique_back);
+	if (pri.name_ent != "CAC 40") {
+		// Création d'un objet contenant les données
+		var data = {act: "logique_flou", search: pri.name_ent};
+		client.post(data, pri.logique_back);
+	}
 };
 
 pri.logique_back = function() {
