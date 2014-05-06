@@ -7,10 +7,10 @@ var sqlite3 = require("sqlite3").verbose();
 
 var pile = [];
 
-exports.get = function(erw,etype,enom,ecallback){
+exports.bd = function(etype,enom,ecallback){
 	pile[pile.length] = {};
 	
-	pile[pile.length-1].rw = erw;
+	pile[pile.length-1].rw = "read";
 	pile[pile.length-1].nom = enom;
 	pile[pile.length-1].type = etype;
 	pile[pile.length-1].callback = ecallback;
@@ -19,6 +19,21 @@ exports.get = function(erw,etype,enom,ecallback){
 	{
 		gestion();
 	}
+};
+exports.readfile = function(enom,ecallback){
+	
+	pile[pile.length] = {};
+	
+	pile[pile.length-1].rw = "read";
+	pile[pile.length-1].nom = enom;
+	pile[pile.length-1].type = "";
+	pile[pile.length-1].callback = ecallback;
+	
+	if(pile.length == 1)
+	{
+		gestion();
+	}
+
 };
 //Fonction de gestion de la pile
 var gestion = function(){
@@ -51,6 +66,7 @@ var read = function(nom,callback){
 	fs.readFile(nom,"UTF-8", function(e,d){
 		if(e) {
 			util.log("ERROR "+nom+" : " + e);
+			depile();
 		} else if (d) {
 			output = JSON.parse(d); // Chargement du dictionnaire de mots dans une variable
 			util.log(nom+" charge");
@@ -69,6 +85,7 @@ var readbase = function(nom,type,callback){
     db.each(stmt, function (e, r) {
 		if(e){
 			util.log("ERROR Base de donnees : " + e);
+			depile();
 		} else if (r) {
 			base[i] = r;
 			i++;
