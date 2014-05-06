@@ -67,7 +67,7 @@ pri.search = function () {
 			
 			if (!article)
 				break;
-			article = article.innerHTML;
+			article = article.innerHTML.toLowerCase();
 			
 			if (article.indexOf(entreprise) < 0) {
 				document.getElementById("article"+i).classList.add("hidden");
@@ -174,13 +174,20 @@ pri.load_ents_back = function () {
 	if (this.readyState == 4 && this.status == 200) {
 		// alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
-		// console.log(r);
+		var tab = [];
+		// console.log(r.resp.nom[0]);
+		for (i in r.resp.nom) {
+			// console.log(r.resp.nom[i].name);
+			tab[i] = (r.resp.nom[i].name);
+		}
+		tab = tab.sort();
+		console.log(tab);
 		var output = "";
-		var tmp = "";
+		// var tmp = "";
 		if (r.resp) {
 			output += '<span onmouseover="this.style.cursor=\'pointer\'"><big><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">CAC 40</li></font></big></span><br/>';
-			for(i in r.resp.nom) {
-				output += '<span onmouseover="this.style.cursor=\'pointer\'"><small><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">'+r.resp.nom[i].name+'</li></font></small></span><br/>';
+			for(i in tab) {
+				output += '<span onmouseover="this.style.cursor=\'pointer\'"><small><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">'+tab[i]+'</li></font></small></span><br/>';
 			}
 			
 			document.getElementById('aff_ents').innerHTML = output;
