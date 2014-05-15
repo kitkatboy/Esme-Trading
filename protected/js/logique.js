@@ -31,17 +31,17 @@ return y;
 */
 //console.log(gauss(5, 0, 4));
 //POIDS JOUR
-server.borneSupJour = 1;
-server.borneInfJour = -1;
+server.borneSupJour = 0.5;
+server.borneInfJour = -0.5;
 //POIDS SEMAINE
-server.borneSupSemaine = 5;
-server.borneInfSemaine = -5;
+server.borneSupSemaine = 1;
+server.borneInfSemaine = -1;
 //VARRIANCE JOUR
-server.borneSuppJour = 10;
-server.borneInffJour = 5;
+server.borneSuppJour = 0.1;
+server.borneInffJour = 0;
 //VARRIANCE SEMAINE
-server.borneSuppSemaine = 140;
-server.borneInffSemaine = 80;
+server.borneSuppSemaine = 0.5;
+server.borneInffSemaine = 0;
 var logiqueFloue = function(nom,tps){
 
 	fs.readFile('../protected/entreprises_cac40.json', 'utf-8', 'r+', function (err, data) {
@@ -55,11 +55,17 @@ var logiqueFloue = function(nom,tps){
 			}
 		}
 		var prevision={};
+		
+		if (nom.indexOf("'") >= 0) { //--------------------------------------------------------------------------- ATTENTION
+			nom = nom.replace("'", "''");
+		}
+		
 		prevision.nom_entreprise=nom;
+		
 		fs.exists('../protected/cac_40.json', function(exist){														
 			if(exist)
 			{	
-				fs.exists('../protected/tmpFichier', function(ex){														
+				fs.exists('../protected/tmpFichier.json', function(ex){														
 					if(ex)						
 					{
 						fs.readFile('../protected/cac_40.json', 'utf-8', 'r+', function (err, data) { // LE FICHIER PEUT EXISTER ET ETRE VIDE ! 
@@ -69,6 +75,7 @@ var logiqueFloue = function(nom,tps){
 							for(i in data.entreprise)
 							{
 								if(data.entreprise[i] !=null){
+									
 									if(data.entreprise[i].nom_entreprise == nom){
 										if(tps=="jour"){	
 											var  variance_jour = +(data.entreprise[i].variance_jour);
@@ -78,6 +85,9 @@ var logiqueFloue = function(nom,tps){
 											prevision.poids_jour = triAnsemble(server.borneInfJour, server.borneSupJour, poids_jour);
 											//console.log("variance ET poids "+ util.inspect(prevision));
 											prevision.temps=tps;
+											
+											// console.log(data.entreprise[i]);
+											
 											ev.emit("jour", prevision);
 										}
 										if(tps=="semaine"){
@@ -182,7 +192,7 @@ ev.on("semaine", function(prevision){
 		output.probabilite = (prevision.variance_semaine.e3 * 4 + prevision.variance_semaine.e2 );
 	}
 
-	//console.log(output);
+	console.log(output);
 	ev.emit("defuzzification",output,"semaine");
 });
 
@@ -213,6 +223,11 @@ ev.on("defuzzification", function(output,jour){
 	//console.log("Resultat logique floue  "+util.inspect(resultat));
 	flou[boite].chiffre[jour].r = resultat;
 	flou[boite].chiffre.date = new Date();
+	
+	// console.log(flou[boite]); //--------------------------------------------------------------------------------------------------------------------
+	// console.log(resultat); //--------------------------------------------------------------------------------------------------------------------
+	
+	
 	ev.emit("sortie");
 	//ev.emit("save", resultat); TODO ENLEVER LE COM
 });
@@ -425,16 +440,26 @@ var readbase = function(entreprise){
 	entreprise = entreprise.replace(" SA","");
 	
 	var cpt = 0;
-	
 	//server.f ++;
 	var i = 0;
 	//var stmt = "SELECT * FROM basearticle";
-	var stmt = "SELECT * FROM basearticle WHERE entreprise = '" + entreprise + " '";
+	var tmp = "";
+	
+	// console.log(entreprise);
+	//------------------------------------------------------------------------------------------------------------------------------ ATTENTION
+	if (entreprise.indexOf("'") >= 0) {
+		tmp = entreprise.replace("'", "''").toUpperCase();
+	} else {
+		tmp = entreprise;
+	}
+	
+	var stmt = "SELECT * FROM basearticle WHERE entreprise = '" + tmp + " '";
     
 	db.each(stmt, function (e, r) {
 		if(e){
 			util.log("ERROR Base de donnees : " + e);
 		} else if (r) {
+			// console.log("coucou");
 			//server.base[i] = r;
 			//sem++;
 			//util.log("-----1");
@@ -450,8 +475,7 @@ var readbase = function(entreprise){
 	ev.emit("sortie");
 		//tmp.article.article.date = new Date();
 		//tmp.article.article.note = output;
-		util.log(sem);
-	
+		// util.log(sem);
 	});
 
 	
@@ -459,7 +483,7 @@ var readbase = function(entreprise){
 
 var exit = function(){
 	//util.log(util.inspect(flou[boite].chiffre));
-	util.log(sem);
+	// util.log(sem);
 	if(!--sem){
 	//util.log(util.inspect(flou));
 		flou[boite].r = {};
@@ -471,6 +495,8 @@ var exit = function(){
 			if(i != "date")
 			{
 				//util.log(i);
+				
+				// console.log(flou[boite].chiffre[i]);
 				
 				flou[boite].r[i].p = flou[boite].chiffre[i].r.probabilite*100;
 				
@@ -506,8 +532,12 @@ var exit = function(){
 			}
 			//util.log(util.inspect(flou[boite].r));
 		}
-		util.log("---------------- coucou");
-		that[fonc](flou[boite].r);
+		// util.log("---------------- coucou");
+		var otmp = {};
+		otmp[boite] = flou[boite];
+		// util.log(otmp);
+		that[fonc](otmp);
+		// that[fonc](flou[boite]);
 		//util.log(util.inspect(flou[boite].r));
 		//write();
 	}
@@ -521,10 +551,18 @@ exports.texist = function(ethat, efonc, entreprise){
 	d = new Date();
 	that = ethat;
 	fonc = efonc;
-	boite = entreprise;
+	boite = "";
 	sem = 0;
 	
-	console.log("- --------------- : " + entreprise);
+	// if (boite.indexOf("'") >= 0) {
+		// boite = entreprise.replace("'", "\'").toUpperCase();
+	// } else {
+		boite = entreprise;
+	// }
+	
+	console.log(boite);
+	
+	// console.log("- --------------- : " + entreprise);
 	//fs.readFile('../slogique.json', 'utf-8', 'r+', function (err, data) {
 		//if (err) util.log(err);
 		//var flou = JSON.parse(flou);
@@ -545,7 +583,7 @@ exports.texist = function(ethat, efonc, entreprise){
 			}
 			else{
 				that[fonc](flou[entreprise].r);
-				util.log("---------------- coucou2");
+				// util.log("---------------- coucou2");
 			}
 		}else{
 			//start(entreprise,date);
@@ -558,16 +596,12 @@ exports.texist = function(ethat, efonc, entreprise){
 			readbase(entreprise);
 			logiqueFloue(entreprise,"jour");
 			logiqueFloue(entreprise,"semaine");
-			util.log(sem);
+			// util.log(sem);
 		}
 	//})
 };
 
-var predict = function(){
+// var predict = function(){
 	
 
-}
-
-
-
-
+// }

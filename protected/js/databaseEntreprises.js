@@ -5,13 +5,13 @@ var EventEmitter = require('events').EventEmitter;
 var event = new EventEmitter();
 var fs = require('fs');
 var server = {};
-server.path = "./";
 
 exports.create = function () {
 	db.run("CREATE TABLE databaseEntreprises (id TEXT, name TEXT, value TEXT, day TEXT, date TEXT)");
 	console.log("database creer");
 };
-
+//------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------
 exports.insert = function (obj) {
 var new_date = new Date();
 	db.serialize( function () {
@@ -21,7 +21,7 @@ var new_date = new Date();
 		console.log("Enregistrement dans la base de donee");
 	});
 };
-
+//------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------
 exports.readAlgo = function (nom, objet, fonction, num_entreprise) {
 	var a = new Array();
@@ -37,7 +37,14 @@ exports.readAlgo = function (nom, objet, fonction, num_entreprise) {
 	var dernier_id_semaine = 0;
 	var dernier_id_jour = 0;
 	var avant_dernier_jours = 0;
+	
+	if (nom.indexOf("'") >= 0) {
+		nom = nom.replace("'", "''");
+	} else {
+		nom = nom;
+	}
 //------------------------------------------------------------------------------------------------------------------	
+
     var stmt = "SELECT day FROM databaseEntreprises WHERE name ="+"'"+nom+"'";
     db.each(stmt, function (e, r) {
 	a.push(+r.day);
@@ -120,6 +127,7 @@ exports.readAlgo = function (nom, objet, fonction, num_entreprise) {
 	});
 	});
 };
+//------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 exports.readWeek = function (obj, fonction, nom, data, vecteur_semaine, vecteur_jour, num_entreprise) { 
 
@@ -153,30 +161,98 @@ exports.readWeek = function (obj, fonction, nom, data, vecteur_semaine, vecteur_
 	});
 	
 }; 
-
+//------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------	
 exports.readAll = function (that, fonc, nom) {
-	
 	var output =[];
+	var outputs ={};
 	var c = new Array();
 	var nbr = 0;
 	var day = 0;
 	var j = 0;
 	var k = 0;
 	var day = 0;
-	fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) {
-			if(err) {
-				console.log(err);
-			} else if (data) {
-			data = JSON.parse(data);
-				 for(i=0; i<data.nom.length; i++) {
-					 if(data.nom[i].name == nom){
-						 nom = data.nom[i].nom;
-					}
-				} 
-			}
-	stmt = "SELECT date, value FROM databaseEntreprises WHERE name = "+"'"+nom+"'"+"ORDER BY date";
+	var maxDay =0;
 	
+	fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) {
+		if(err) {
+			console.log(err);
+		} else if (data) {
+		data = JSON.parse(data);
+			 for(i=0; i<data.nom.length; i++) {
+				 if(data.nom[i].name == nom){
+					 nom = data.nom[i].nom;
+				}
+			} 
+		}
+	
+		if (nom.indexOf("'") >= 0) {
+			nom = nom.replace("'", "''");
+		}
+	//-----------------------------------------------------------------------------------------
+		db.get("SELECT MAX(day), day, value FROM databaseEntreprises WHERE name = "+"'"+nom+"'", function (e, r){
+		res = new Array();
+			if (e) {
+				util.log("ERROR : " + e);
+			} else if (r) {
+				maxDay = r.day;
+				var lastDay = maxDay -1;
+					db.get("SELECT MAX(date), value FROM databaseEntreprises WHERE day ="+"'"+lastDay+"'"+"AND name = "+"'"+nom+"'", function (e, r){
+					res = new Array();
+					if (e) {
+					util.log("ERROR : " + e);
+					} else if (r) {
+					var cloture = parseFloat(r.value);
+					outputs.cloture = cloture;	
+					}
+					});
+			}
+			
+	//-----------------------------------------------------------------------------------------	
+	db.get("SELECT MAX(date), value FROM databaseEntreprises WHERE name = "+"'"+nom+"'"+"AND day = "+"'"+maxDay+"'", function (e, r){
+		res = new Array();
+			if (e) {
+				util.log("ERROR : " + e);
+			} else if (r) {
+				var coursActuel = parseFloat(r.value);
+				outputs.coursActuel = coursActuel;	
+			}
+		
+	//-----------------------------------------------------------------------------------------	
+	db.get("SELECT MIN(date), value FROM databaseEntreprises WHERE name = "+"'"+nom+"'"+"AND day = "+"'"+maxDay+"'", function (e, r){
+		res = new Array();
+			if (e) {
+				util.log("ERROR : " + e);
+			} else if (r) {
+				var ouverture = parseFloat(r.value);
+				// console.log(ouverture);
+				outputs.ouverture = ouverture;
+			}
+		
+	//-----------------------------------------------------------------------------------------	
+	db.get("SELECT MAX(value), value FROM databaseEntreprises WHERE name = "+"'"+nom+"'"+"AND day = "+"'"+maxDay+"'", function (e, r){
+		res = new Array();
+			if (e) {
+				util.log("ERROR : " + e);
+			} else if (r) {
+				var plusHaut = parseFloat(r.value);
+				// console.log(plusHaut+ "  plusHaut");
+				outputs.plusHaut = plusHaut;
+			}	
+	//-----------------------------------------------------------------------------------------	
+	db.get("SELECT MIN(value), value FROM databaseEntreprises WHERE name = "+"'"+nom+"'"+"AND day = "+"'"+maxDay+"'", function (e, r){
+		res = new Array();
+			if (e) {
+				util.log("ERROR : " + e);
+			} else if (r) {
+				var plusBas = parseFloat(r.value);
+				// console.log(plusBas+ "  plusbas");
+				outputs.plusBas = plusBas;
+			}
+			
+	outputs.variation = (((+outputs.coursActuel)*100)/(+outputs.cloture))-100;
+	//-----------------------------------------------------------------------------------------		
+	stmt = "SELECT date, value FROM databaseEntreprises WHERE name = "+"'"+nom+"'"+"ORDER BY date";
     db.each(stmt, function (e, r) {
 		if (e) {
 			util.log("ERROR : " + e);
@@ -203,69 +279,161 @@ exports.readAll = function (that, fonc, nom) {
 			}
 			 b = b.substring(0,  b.length-2);
 			 output[day]="["+b+"]";
-			 // console.log(JSON.parse(output[0]));
-			 that[fonc](output);
-		});
-	 });
+			 outputs.output = output;
+			  // console.log(outputs);
+			 that[fonc](outputs);
+	});
+	});
+	});	
+	});
+	});
+	});
+	});
 };
 //--------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 /*
-exports.stock = function (user, stocks, objet, fonction, nbr) {
-	b = "";
-	var c = 0;
-	var save = "";
-	
-	fs.readFile(server.path+'entreprises_cac40.js', 'utf-8', function (err, data) {
-			if(err) {
-				console.log(err);
-			} else if (data) {
-			data = JSON.parse(data);
-			for (i=0; i<stocks.length; i++){
-				 for(j=0; j<data.nom.length; j++) {
-					 if(data.nom[j].name == stocks[i]){
-						 nom = data.nom[i].nom; 
-						console.log(nom);
-						 
-						 stmt = "SELECT MAX(date), value FROM databaseEntreprises WHERE name = "+"'"+nom+"'";
-						db.each(stmt, function (e, r) {
-						if (e) {
-						util.log("ERROR : " + e);
-						} else if (r) {
-							c = parseFloat(r.value);
-						}}, 
-						function () {
-						});	
-						 	miseParScociete = c * nbr;
-							val = c;
+exports.readStock = function () {
+	var c = new Array;
+	var j = 0;
+	var nbr =0;
+	var json = new Array();
+
+	db.get("SELECT MAX(id), id FROM databaseEntreprises", function (e, r){ // todo max id
+		if (e) {
+			util.log("ERROR : " + e);
+		} else if (r) {
+			var maxId = r.id;
+			// console.log(maxId);
+		}	
+		stmt = "SELECT name, value FROM databaseEntreprises WHERE id = "+"'"+maxId+"'";
+		db.each(stmt, function (e, r) {
+		if (e) {
+			util.log("ERROR : " + e);
+		} else if (r) {
+			c.push(r.name);
+			c.push(parseFloat(r.value));
+			nbr++;
+		}},function () {
+			// console.log(c);
+			for(var i=0; i < 2*nbr; i++) 
+			{	var b = {};
+				b.name=c[i];
+				b.value=c[i+1];
+				json.push(b); 
+				i++;
+			}
+			fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) {	
+				if(err) {
+					console.log(err);
+				} else if (data) {
+					data = JSON.parse(data);
+					for(i=0; i<data.nom.length; i++) {
+						if(json[i]){
+							json[i].name = data.nom[i].name;
 						}
 					}
-				}
-			user.
+					console.log(json);
+					fs.writeFile("../protected/stock.json", JSON.stringify(json), 'utf8', 'a+', function(err){
+					if(err) throw err;
+					console.log('we just saved the buffer in a file');
+					}); 
 				
-			}
+				}
+			});
+					
+		});
 	});
 };
 */
-// exports.stock(null, ['Essilor International SA', 'Accor SA'], null, null);
+exports.readStock = function () {
+	var name = "";
+	var name2 = "";
+	var symb = "";
+	// var json = {};
+	var tmp = [];
+	var tmp2 = [];
+	var cpt = 0;
+	// var cpt2 = 0;
+	
+	db.each("SELECT DISTINCT name FROM databaseEntreprises", function (e, r){
+		if (e) {
+			util.log("ERROR1 : " + e);
+		} else if (r) {
+			// cpt2++;
+			// On remplace s'il y a une apostrophe dans le nom pr assurer la requête SQL
+			if (r.name.indexOf("'") >= 0) {
+				name = r.name.replace("'", "''");
+			} else {
+				name = r.name;
+			}
+			// --------------------------------------------- Pr entreprises_cac40.js --------------------------------------
+			// name2 = r.name.split("(");
+			// symb = name2[1].substring(0, name2[1].length - 1);
+			// name2 = name2[0].substring(0, name2[0].length - 1);
+			
+			// tmp.push({name: name2, symbole: symb, nom: r.name});
+			// -------------------------------------------------------------------------------------------------------------- 
+			db.get("SELECT value FROM databaseEntreprises WHERE name = '"+name+"' ORDER BY date DESC", function (e, d) {
+				if (e) {
+					util.log("ERROR2 - " + e);
+				} else if (d) {
+					cpt++;
+					name2 = r.name.split("(");
+					name2 = name2[0].substring(0, name2[0].length - 1);
+					
+					tmp2.push({name: name2, value: d.value});
+					
+					if (cpt == tmp.length) {
+						// console.log(cpt)
+						// console.log(tmp2);
+						
+						// TO DO fichier stock.json
+						fs.writeFile("../protected/stock.json", JSON.stringify(tmp2), "UTF-8",function (e){
+							if (e) {
+								util.log("ERROR - Ecriture " + _this.nom_json + " : " + e);
+							}
+						});
+						
+					}
+				}
+			});
+		}
+	}/*, function () {
+		// --------------------------------------------- Pr entreprises_cac40.js --------------------------------------
+		// console.log(cpt2);
+		json.nom = tmp;
+		// console.log(json);
+		
+		// TO DO fichier entreprises_cac40.json
+		fs.writeFile("../protected/entreprises_cac40.json", JSON.stringify(json), "UTF-8",function (e){
+			if (e) {
+				util.log("ERROR - Ecriture " + _this.nom_json + " : " + e);
+			}
+		});
+	}*/);
+};
+/*
+exports.read = function () {
+	var cpt = 0;
+	stmt = "SELECT value FROM databaseEntreprises WHERE name = 'L''Oreal SA (OR.PA)'";
+    db.each(stmt, function (e, r) {
+		if (e) {
+			util.log("ERROR : " + e);
+		} else if (r) {
+			cpt++;
+			console.log(r);
+			console.log(cpt);
+		}
+	});
+};
+*/
 //------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------
+// exports.readStock();
+// exports.stock(null, ['Essilor International SA', 'Accor SA'], null, null);
 //exports.readWeek(null, null,'Essilor International SA (EI.PA)', null, null, null, null);
 //exports.create();
 //exports.insert({"id" : 2, "nom" : "ALTRAN", "valeur" : 54, "jour": 1});
-// exports.readAll(null, null,'Essilor International SA');
-//exports.readAlgo('Essilor International SA (EI.PA)', null, null, null);
-
-/*	
-	fs.readFile(server.path+'entreprises_cac40.js', 'utf-8', function (err, data) {
-			if(err) {
-				console.log(err);
-			} else if (data) {
-			data = JSON.parse(data);
-				 for(i=0; i<data.nom.length; i++) {
-					 if(data.nom[i].name == nom){
-						 nom = data.nom[i].nom;
-						 console.log(nom);
-					}
-				} 
-			}
-	});
-*/	
+// exports.readAll(null, null,'Air Liquide SA');
+// exports.readAlgo('Essilor International SA', null, null, null);

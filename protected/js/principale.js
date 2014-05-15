@@ -2,6 +2,8 @@ var pri = {};
 pri.tps = 0;
 pri.name_ent = "CAC 40";
 pri.donnes_courbe = [];
+pri.mem_portefeuille = "";
+pri.date = "";
 pri.interv_search;
 
 
@@ -9,24 +11,29 @@ pri.interv_search;
 pri.init = function () {
 	/* object.addEventListener (eventName, function, useCapture) */
     document.addEventListener("click", pri.on_click);
+    // document.addEventListener("keypress", pri.on_key_press);
 	pri.load_art();
 	pri.load_ents();
 	pri.load_courbe();
+	pri.logique();
+	pri.portefeuille();
 	
 	// Recherche dynamique par chaîne de caractères dans les articles
 	document.getElementById("search").onfocus = function (){pri.interv_search = setInterval(pri.search, 10);};
+	document.getElementById("search").onkeypress = function (ev){if (ev.keyCode == 13) {return false;}};
 	document.getElementById("search").onblur = function () {clearInterval(pri.interv_search);};
 };
 
 pri.on_click = function (ev) {
 	// .target désigne la cible(le noeud DOM) concerné par le chang. d'état sur événement "click"
-    var src = ev.target;
+	var src = ev.target;
 	if (src.has_class("post1")) {
 		// bouton deconnexion
 		pri.send_post1();
 	} else if (src.has_class("courbe_societe")) {
 		// appel des informations par société
 		pri.name_ent = src.innerHTML;
+		pri.search(pri.name_ent);
 		pri.load_courbe();
 		
 		if (pri.name_ent) {
@@ -37,6 +44,15 @@ pri.on_click = function (ev) {
 		pri.load_art()
 	} else if (src.has_class("tps_courbe")) {
 		pri.tps_courbe(src.innerHTML);
+	} else if (src.has_class("création")) {
+		// Création du portefeuille d'actions
+		pri.portefeuille("création");
+	} else if (src.has_class("achat_ok")) {
+		// Acheter des actions
+		pri.portefeuille("achat", src.id);
+	} else if (src.has_class("vente_ok")) {
+		// Vendre des actions
+		pri.portefeuille("vente", src.id);
 	}
 };
 
@@ -55,22 +71,63 @@ pri.post1_back = function () {
 	}
 };
 
-pri.search = function () {
+pri.search = function (click_ent) {
 	var i = 0;
-	var entreprise = document.getElementsByClassName("entreprise")[0].value.toLowerCase();
+	var cpt = 0;
+	var mem_ent = "";
+	var sup = "SA S.A. SE REG NV GROUP CAC 40";
+	var ext = "Liquide Paribas Agricole Générale";
+	var entreprise, ent_temp = "";
+	var ent_save = new Array();
 	var article = document.getElementById("article"+i);
-	// setInterval(console.log(entreprise),1);
 	
+	if (click_ent) {
+		if (click_ent == "Compagnie de Saint-Gobain") {
+			entreprise = click_ent.toLowerCase();
+		} else if (click_ent == "Electricité de France S.A.") {
+			entreprise = "edf";
+		} else {
+			ent_save = click_ent.split(" ");
+			// console.log("1 - " + ent_save);
+			
+			for (var j = 0; j < 2; j++) {
+				
+				if (sup.indexOf(ent_save[j]) >= 0) {
+					ent_save[j] = "";
+				}
+			}
+			
+			if (ext.indexOf(ent_save[0]) >= 0 || ext.indexOf(ent_save[1]) >= 0) {
+				entreprise = ent_save[0] + " " + ent_save[1];
+			} else {
+				entreprise = ent_save[0]
+			}
+		
+			entreprise = entreprise.toLowerCase();
+		}
+	} else {
+		entreprise = document.getElementsByClassName("entreprise")[0].value.toLowerCase();
+		
+		var reg = new RegExp("é", "g");
+		entreprise = entreprise.replace(reg, "e");
+	}
+	
+	// console.log(" - " + entreprise);
 	while (article) {
 		if (entreprise) {
 			article = document.getElementById("article"+i);
 			
 			if (!article)
 				break;
+			cpt++;
 			article = article.innerHTML.toLowerCase();
+			// console.log(article);
+			// var reg = new RegExp("é", "g");
+			// article = article.replace(reg, "e");
 			
 			if (article.indexOf(entreprise) < 0) {
 				document.getElementById("article"+i).classList.add("hidden");
+				cpt--;
 			} else {
 				document.getElementById("article"+i).className = "col-xs-12";
 			}
@@ -83,10 +140,21 @@ pri.search = function () {
 			
 			if (article.indexOf("hidden") >= 0) {
 				document.getElementById("article"+i).className = "col-xs-12";
+				cpt--;
 			}
 		}
-		i++
+		i++;
+		// console.log(cpt);
+		
+		if (entreprise != mem_ent) {
+			if (cpt == 0) {
+				document.getElementById("article_fin").className = "col-xs-12";
+			} else {
+				document.getElementById("article_fin").classList.add("hidden");
+			}
+		}
 	}
+	entreprise = mem_ent;
 }
 
 pri.load_art = function () {
@@ -117,7 +185,8 @@ pri.load_articles_back = function () {
 					image = "../images/NotFound.jpg";
 				}
 				
-				output +=	'<div id="article'+i+'" class="col-xs-12" style="padding-right:0px";>' +
+				output +=	'<div id="article'+i+'" class="col-xs-12" style="padding-right:0px;">' +
+								'<div class="hidden">'+(articles[i].societe).toLowerCase()+'</div>'+
 								'<div class="row accordion-toggle '+color+'" data-toggle="collapse" data-target="#collapse'+i+'" style="margin:0px;">'+
 									'<div class="col-xs-3" style="width:80px; padding:0px; margin:15px; margin-right:-15px;"><img src="'+image+'" width=50 height=50></div>'+
 									'<div class="col-xs-9" style="padding:0px; margin-top:10px; margin-right:10px;"><small><font color="MediumBlue">'+articles[i].titre+'</font></small></div>' +
@@ -133,6 +202,13 @@ pri.load_articles_back = function () {
 								'</div>' +
 							'</div>';
 			}
+			
+			output += '<div class="hidden" id="article_fin" class="col-xs-12" style="margin:10px;" onmouseover="this.style.cursor=\'default\'">' +
+							'<div style="margin:0px;">'+
+								'<div class="col-xs-12" style="padding:0px; margin-top:10px; margin-right:10px;"><small>Aucun article correspondant</small></div>' +
+							'</div>' +
+						'</div>';
+			
 			document.getElementById('articles').innerHTML = output;
 		} else if (articles == "log out") {
 			window.location.assign("/acceuil.html");
@@ -141,12 +217,12 @@ pri.load_articles_back = function () {
 		} else {
 			alert("Les articles n'ont pas pu être rafraichis");
 		}
-		background_color();
+		pri.background_color();
 	}
 };
 
 /* Propriété CSS */
-var background_color = function () {
+pri.background_color = function () {
 	var success = document.getElementsByClassName("positif");
 	for (a in success) {
 		success[a].onmouseover = function () { this.style.background  = "#b2dba1";};
@@ -175,15 +251,11 @@ pri.load_ents_back = function () {
 		// alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
 		var tab = [];
-		// console.log(r.resp.nom[0]);
 		for (i in r.resp.nom) {
-			// console.log(r.resp.nom[i].name);
 			tab[i] = (r.resp.nom[i].name);
 		}
 		tab = tab.sort();
-		console.log(tab);
 		var output = "";
-		// var tmp = "";
 		if (r.resp) {
 			output += '<span onmouseover="this.style.cursor=\'pointer\'"><big><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">CAC 40</li></font></big></span><br/>';
 			for(i in tab) {
@@ -216,10 +288,13 @@ pri.load_courbe_back = function() {
 		//alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
 		
+		// console.log(r.resp);
+		
 		if (typeof r.resp == "object") {
 			pri.donnes_courbe = r.resp;
-			pri.tps = 1;
+			pri.tps = pri.donnes_courbe.output.length - 1;
 			pri.affichage_courbe();
+			pri.affichage_chiffres();
 		} else if (r.resp == "log out") {
 			window.location.assign("/acceuil.html");
 		} else {
@@ -229,41 +304,94 @@ pri.load_courbe_back = function() {
 	}
 };
 
+pri.affichage_chiffres = function () {
+	var output = "";
+	var color = "";
+	var signe = "";
+	var date = "";
+	var variation = parseFloat(pri.donnes_courbe.variation);
+	
+	variation = Math.round(variation * 100)/100;
+				
+	if (variation >= 0) {
+		variation = variation.toString().substring(0,4);
+		color = 'LimeGreen';
+		signe = '+ ';
+	} else {
+		variation = variation.toString().substring(1,5);
+		color = 'rgb(244, 91, 91)';
+		signe = '- ';
+	}
+	
+	variation = variation.toString().substring(0,4);
+	
+	if (variation.length == 3) {
+		variation += '0';
+	} else if (variation.length == 1) {
+		variation += '.00';
+	}
+	
+	output ='<span style="padding:20px;"><strong>'+pri.date+'</strong></span>' +
+			'<hr style="margin-top:10px"/>' +
+				'<strong>Cours<big class="pull-right" style="margin-top:-2px;">'+pri.donnes_courbe.coursActuel+'</big></strong><br/><br/>' +
+				'<strong>Variation<big class="pull-right"  style="margin-top:-2px; color:'+color+';">'+signe+variation+'%</big></strong><br/>' +
+			'<hr/>' +
+			'<span>Ouverture<span class="pull-right">'+pri.donnes_courbe.ouverture+'</span></span><br/>' +
+			'<span>+ HAUT<span class="pull-right"><font color="MediumSeaGreen">'+pri.donnes_courbe.plusHaut+'</font></span></span><br/>' +
+			'<span>+ BAS<span class="pull-right"><font color="Tomato">'+pri.donnes_courbe.plusBas+'</font></span></span><br/>' +
+			'<span>Clôture préc.<span class="pull-right">'+pri.donnes_courbe.cloture+'</span></span>';
+			
+	document.getElementById('aff_chiffres').innerHTML = output;
+};
+
 pri.tps_courbe = function(demande) {
 	if (demande == "Jour") {
-		pri.tps = 1;
+		pri.tps = pri.donnes_courbe.output.length - 1;
 	} else if (demande == "Semaine") {
-		pri.tps = 7;
+		pri.tps = pri.donnes_courbe.output.length - 5;
 	} else {
-		pri.tps = 30;
+		pri.tps = pri.donnes_courbe.output.length - 23;
 	}
 	pri.affichage_courbe();
 };
 
 pri.affichage_courbe = function () {
-	var output = [];
+	var output = {};
+	output.name = "Cours";
+	output.data = new Array();
+	var date = [];
+	var cpt = 0;
 	
-	if (pri.tps >= pri.donnes_courbe.length) {
-		pri.tps = pri.donnes_courbe.length;
+	if (pri.tps < 0) {
+		pri.tps = 0;
 	}
 	
-	for(var i = 0; i < pri.tps; i++)
-	{
-		output[i] = {};
-		output[i].type = 'area';
-		output[i].data = new Array();
-		tmp = JSON.parse(pri.donnes_courbe[i]);
-		for (j in tmp) {
-			output[i].data.push(tmp[j]);
+	// Traitement affichage courbe
+	for (i = pri.tps; i < pri.donnes_courbe.output.length; i++) {
+		var tempo = JSON.parse(pri.donnes_courbe.output[i]);
+		
+		for (j in tempo) {
+			var tempo2 = tempo[j];
+			var tmp = new Date(tempo2[0]);
+			
+			if (tmp.getMinutes() < 10) {
+				date.push((tmp.toDateString()).substring(0,3)+" "+tmp.getDate()+" "+tmp.getHours()+":0"+tmp.getMinutes());
+			} else {
+				date.push((tmp.toDateString()).substring(0,3)+" "+tmp.getDate()+" "+tmp.getHours()+":"+tmp.getMinutes());
+			}
+			output.data.push(tempo2[1]);	
 		}
 	}
 	
+	pri.date = date[date.length - 1];
+
 	$(function () {
 		var highchartsOptions = Highcharts.setOptions(Highcharts.theme1);
-		$('#courbe').highcharts({
+		var chart = new Highcharts.Chart(Highcharts.merge(theme1, {
 			chart: {
-				zoomType: 'x',
-				spacingRight: 20
+				renderTo: 'courbe',
+				type : 'area',
+				zoomType : 'x'
 			},
 			title: {
 				text: pri.name_ent
@@ -274,11 +402,13 @@ pri.affichage_courbe = function () {
 					'Pincez pour zoomer'
 			},
 			xAxis: {
-				type: 'datetime',
-				maxZoom: 5 * 60 * 1000, // cinq minutes
-				title: {
-					text: null
-				}
+				lineColor: 'transparent',
+				labels: {
+					enabled: false
+				},
+				tickLength: 0,
+				tickInterval:10000000,
+				categories : date
 			},
 			yAxis: {
 				title: {
@@ -312,17 +442,19 @@ pri.affichage_courbe = function () {
 					},
 					threshold: null
 				}
-			},
-
-			series: output
-		});
+			},	 
+			series: [output]
+		}))
 	});
 };
-
+	
 pri.logique = function() {
 	if (pri.name_ent != "CAC 40") {
 		// Création d'un objet contenant les données
 		var data = {act: "logique_flou", search: pri.name_ent};
+		client.post(data, pri.logique_back);
+	} else if (pri.name_ent == "CAC 40" || pri.name_ent == ""){ //-----------------------------------------------------------------------------------------------------
+		var data = {act: "logique_flou", search: "Alstom SA"};
 		client.post(data, pri.logique_back);
 	}
 };
@@ -331,96 +463,233 @@ pri.logique_back = function() {
 	if (this.readyState == 4 && this.status == 200) {
 		// alert("this : " + this.responseText);
 		var r = JSON.parse(this.responseText);
-		console.log(r.resp.jour);
-		console.log(r.resp.semaine);
 		
-		/*
-		<p><font color="green">pri.name_ent : </font></p>
-		<p><font color="blue">Prévision à la journée : </font>Investissez dans cette société.</p>
-		<p><font color="blue">Prévision à la semaine : </font>Vendez vos actions de cette société.</p>
-			*/		
-					
-					
-		/*
+		var prev_mont = "";
+		var tps = "Journée";
+		// var traitment = r.resp;
 		var output = "";
-		var tmp = "";
+		var tmp = 0;
+		
+		 // console.log(r.resp);
+		// console.log(r.resp.jour);
+		// console.log(r.resp.semaine);
+		
 		if (r.resp) {
-			for(i in r.resp.nom) {
-				output += '<span onmouseover="this.style.cursor=\'pointer\'"><small><font color="SteelBlue"><li class="courbe_societe" style="line-height:15px;">'+r.resp.nom[i].name+'</li></font></small></span><br/>';
+			for (j in r.resp) {
+			 // console.log(j);
+				traitment = r.resp[j].r.jour;
+				output +='<div class="col-xs-12" style="padding:0px; padding-bottom:5px;">' +
+							'<div class="col-xs-3" style="padding-right:0px;"><small><strong><font color="blue">'+j+'</font></strong></small></div>'+
+							'<div class="col-xs-5">';
+
+				// console.log(r.resp[j].r.jour);
+				// console.log(r.resp[j].r.semaine);
+				
+				for (var i = 0; i < 2; i++) {
+					// console.log(typeof traitment.s);
+					if (traitment.s == 1) {
+						prev_mont = '<strong><font color="green">Croissance</font></strong>';
+					} else if (traitment.s == -1) {
+						prev_mont = '<strong><font color="red">Déroissance</font></strong>';
+					} else {
+						prev_mont = '<strong><font color="blue">Stabilité</font></strong>';
+					}
+					
+					tmp = Math.round((traitment.p * 100) / 100);
+					
+					output += '<small>'+tps+' : '+prev_mont+" certitude "+tmp+'%.</small><br/>';
+					
+					traitment = r.resp[j].r.semaine;
+					tps = "Semaine";
+				}
+				
+				output += '</div>' +
+								'<div id="investir1'+j+'" class="btn-group col-xs-2" style="padding:0px; padding-top:14px;">' +
+									'<div class="btn btn-default btn-xs dropdown-toggle pull-left" type="button" data-toggle="dropdown">' +
+										'Acheter <span class="caret"></span>' +
+									'</div>' +
+									'<ul class="dropdown-menu" style="padding:0px;">' +
+										'<div style="padding:5px;">' +
+											'<div class="input-group">' +
+											  '<input id="cache_achat_'+j+'" class="form-control"  placeholder="nbr de titres" onkeyup="this.value=this.value.replace(/[^0-9]/ig, \'\');">' +
+											  '<span class="input-group-btn">' +
+												'<div id="'+j+'" class="achat_ok btn btn-default">Ok</div>' +
+											  '</span>' +
+											'</div>' +
+										'</div>' +
+									'</ul>' +
+								'</div>' +
+								'<div id="investir2'+j+'" class="btn-group col-xs-2" style="padding:0px; padding-top:14px;">' +
+									'<div class="btn btn-default btn-xs dropdown-toggle pull-left" type="button" data-toggle="dropdown">' +
+										'Vendre <span class="caret"></span>' +
+									'</div>' +
+									'<ul class="dropdown-menu" style="padding:0px;">' +
+										'<div style="padding:5px;">' +
+											'<div class="input-group">' +
+											  '<input id="cache_vente_'+j+'" class="form-control"  placeholder="nbr de titres" onkeyup="this.value=this.value.replace(/[^0-9]/ig, \'\');">' +
+											  '<span class="input-group-btn">' +
+												'<div id="'+j+'" class="vente_ok btn btn-default">Ok</div>' +
+											  '</span>' +
+											'</div>' +
+										'</div>' +
+									'</ul>' +
+								'</div>' +
+						'</div><hr/ style="margin-top:10px; margin-bottom:0px;"><hr/>';
+			}
+
+			document.getElementById('logique').innerHTML = output;
+			
+			for (k in r.resp) {
+				if (pri.mem_portefeuille == "not exist") {
+					document.getElementById("investir1"+k).classList.add("hidden");
+					document.getElementById("investir2"+k).classList.add("hidden");
+				} else {
+					document.getElementById("cache_achat_"+k).onclick = function (ev) {ev.stopPropagation();};
+					document.getElementById("cache_vente_"+k).onclick = function (ev) {ev.stopPropagation();};
+				}
+			}
+		} else {
+			output = '<p>Affichage des suggestions impossible</p>'
+		}
+	}
+};
+
+pri.portefeuille = function (action, entreprise) {
+	var data = {};
+	var b = "";
+	
+	if (action == "achat") {
+		b = document.getElementById("cache_achat_"+entreprise).value;
+	} else if (action == "vente") {
+		b = document.getElementById("cache_vente_"+entreprise).value;
+	}
+	
+	data = {act: "ecriture_portefeuille", search: action, ent: entreprise, quant: b};
+	client.post(data, pri.portefeuille_back);
+};
+
+pri.portefeuille_back = function() {
+	if (this.readyState == 4 && this.status == 200) {
+		// alert("this : " + this.responseText);
+		var r = JSON.parse(this.responseText);
+		
+		if (typeof r.resp == "object") {
+			var output = "";
+			var output2 = "";
+			pri.mem_portefeuille = r.resp.info;
+		
+			// console.log(r.resp);
+			// console.log(r.resp.value);
+			// console.log(typeof r.resp.value.entreprise["Gemalto"][1])
+			
+			if (pri.mem_portefeuille == "exist") {
+				if (r.resp.value.entreprise) {
+					var data = [];
+				
+					output = '<table class="table table-hover" style="margin-top:-5px;">' +
+								'<tr onmouseover="this.style.cursor=\'default\'">' +
+									'<th><small>Société</small></th>' +
+									'<th title="Votre nombre d\'actions dans cette société"><small>Actions</small></th>' +
+									'<th title="Cotation actuelle du titre"><small>Valeur</small></th>' +
+									'<th title="Votre investissement, bénéfices des actions vendues déduits"><small>Coût</small></th>' +
+									'<th class="text-right"><small>Profits / Pertes</small></th>' +
+								'</tr>';
+								
+					for(i in r.resp.value.entreprise) {
+						if (parseFloat(r.resp.value.entreprise[i][1]) > 0) {
+							var temp = [];
+							var profit = Math.round(((parseFloat(r.resp.value.entreprise[i][1]) * parseFloat(r.resp.value.entreprise[i][2])) - parseFloat(r.resp.value.entreprise[i][3])) * 100)/100;
+							
+							output +='<tr>' +
+										'<td><small><font color="blue">'+r.resp.value.entreprise[i][0]+'</font></small></td>' +
+										'<td><small>'+r.resp.value.entreprise[i][1]+'</small></td>' +
+										'<td><small>'+r.resp.value.entreprise[i][2]+'</small></td>' +
+										'<td><small>'+r.resp.value.entreprise[i][3]+'</small></td>' +
+										'<td class="text-right"><strong><small>'+profit+'</small></strong></td>' +
+									'</tr>';
+									
+							temp = [r.resp.value.entreprise[i][0], parseFloat(r.resp.value.entreprise[i][3])];
+							data.push(temp);
+						}
+					}
+					
+					output += '</table>';
+								
+					output2 = '<div style="margin-left:10px;">' +
+									'<br/><br/><strong><small>Argent non placé : '+r.resp.value.argent+' euros</small></strong><br/><br/>' +
+								'</div>';
+								
+					// Appel cammenbert
+					pri.cammenbert(data);
+					
+				} else {
+					output2 ='<div style="margin-left:10px;">' +
+								'<br/><br/><strong><small>Argent non placé : '+r.resp.value.argent+' euros</small></strong><br/><br/>' +
+							'</div>';
+				}
+						
+			} else if (pri.mem_portefeuille == "create") {
+				alert("Votre portefeuille d'actions est créer et un budget de 20000 euros vous est alloué. Bon jeu!");
+				window.location.assign("/principale.html");
+			} else {
+				output = '<div class="création btn btn-primary btn-sm" style="margin-top:-151px; margin-left:222px;">Je créer mon portefeuille</div>';
 			}
 			
-			document.getElementById('logique').innerHTML = output;
+			document.getElementById("portefeuille").innerHTML = output;
+			document.getElementById("argent").innerHTML = output2;
+		
+		} else if (r.resp == "pas possible") {
+			alert("Vous ne disposez pas d'autant de titres dans cette société");
+		} else if (r.resp == "pas assez d'argent") {
+			alert("Vous ne disposez pas d'autant d'argent");
+		} else if (r.resp == "log out") {
+			window.location.assign("/acceuil.html");
 		} else {
-			alert("Les entreprises n'ont pas pu être chargées");
-		}*/
+			alert("Un problème est survenu lors du chargement du portefeuille");
+		}
+		
 	}
 };
 
 /* Fonction d'affichage cammembert Portefeuille */
-$(function () {
-    	
-	// Make monochrome colors and set them as default for all pies
-	Highcharts.getOptions().plotOptions.pie.colors = (function () {
-		var colors = [],
-			base = Highcharts.getOptions().colors[0],
-			i
-
-		for (i = 0; i < 10; i++) {
-			// Start out with a darkened base color (negative brighten), and end
-			// up with a much brighter color
-			colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
-		}
-		return colors;
-	}());
-	
-	// Build the chart
-	$('#cammembert').highcharts({
-		chart: {
-			plotBackgroundColor: null,
-			plotBorderWidth: null,
-			plotShadow: false
-		},
-		title: {
-			text: ''
-		},
-		tooltip: {
-			pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-		},
-		plotOptions: {
-			pie: {
-				allowPointSelect: true,
-				cursor: 'pointer',
-				dataLabels: {
-					enabled: true,
-					format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-					style: {
-						color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-					}
-				}
-			}
-		},
-		series: [{
-			type: 'pie',
-			name: 'Browser share',
-			data: [
-				['Firefox',   45.0],
-				['IE',       26.8],
-				{
-					name: 'Chrome',
-					y: 12.8,
-					sliced: true,
-					selected: true
+pri.cammenbert = function (donnees) {
+	$(function () {
+		var chart;
+		
+		$(document).ready(function () {
+			
+			// Build the chart
+			$('#cammenbert').highcharts({
+				chart: {
+					plotBackgroundColor: null,
+					plotBorderWidth: null,
+					plotShadow: false
 				},
-				['Safari',    8.5],
-				['Opera',     6.2],
-				['Others',   0.7]
-			]
-		}]
+				title: {
+					text:''
+				},
+				tooltip: {
+					pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+				},
+				plotOptions: {
+					pie: {
+						cursor: 'default',
+						dataLabels: {
+							enabled: false
+						},
+					}
+				},
+				series: [{
+					type: 'pie',
+					name: 'Argent placé',
+					data: donnees
+				}]
+			});
+		});   
 	});
-});
-    
+};
 
-	
+
 window.onload = function () {
     setTimeout(pri.init, 1);
 };

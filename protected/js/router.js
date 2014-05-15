@@ -26,7 +26,7 @@ constructeur = function (req, resp) {
 		this.path = ""; // Contient le chemin d'accès
 		this.image_file = "jpg png jpeg bmp gif ico"; // Contient ttes les extensions d'images prisent en charge
 		//this.var_test == false;
-		util.log("Traitement de l\'url de l'objet \'requete\' : " + util.inspect(req.url));
+		// util.log("Traitement de l\'url de l'objet \'requete\' : " + util.inspect(req.url));
 	} else {
 		util.log("ERROR - Un objet constructeur a besoin d'une requete et d'une reponse.");
 		return;
@@ -37,7 +37,7 @@ constructeur.prototype = {
 
 traitement_method:
     function () {
-        util.log("Requete reçue de type : " + this.req.method + ".");
+        // util.log("Requete reçue de type : " + this.req.method + ".");
 		
         if (this.req.method == "GET") {
 			this.get_method(); // Appel de la methode de traitement des GET		
@@ -78,7 +78,8 @@ go_post:
 		* util.inspect() -> affiche le contenu d'un objet sous forme d'une chaîne de caractères
 		* JSON.parse() -> Convertie un String en JSON
 		*/
-		util.log("Mail : " + paquets.mail + ", Id : " + paquets.id + ", MdP : " + paquets.mdp + ", act : " + paquets.act + ", search : " + paquets.search);
+		// util.log("Mail : " + paquets.mail + ", Id : " + paquets.id + ", MdP : " + paquets.mdp + ", act : " + paquets.act + ", search : " + paquets.search
+		// + ", ent : " + paquets.ent + ", quant : " + paquets.quant);
 		
 		post.postReq(paquets, this.req, this.resp);
     },
@@ -94,8 +95,6 @@ get_method:
         this.filetype = this.pathname[this.pathname.length - 1].split("."); // Sépare le dernier caractère en deux au "."
 		this.filetype = this.filetype[this.filetype.length - 1]; // Récupère l'extension du fichier
 		this.path = "../public" + u.path + ((u.path.indexOf(".") >= 0) ? "" : this.extension());
-		
-		//console.log("Pathname : " + this.path);
         
 		this.read_file();
     },
@@ -111,7 +110,7 @@ read_file:
     function () {
 		var _this = this;
 		/* Si le chemin est vide on retourne la page d'acceuil */
-		util.log("Path : " + this.path/* + " " + util.inspect(this.pathname)*/);
+		// util.log("Path : " + this.path/* + " " + util.inspect(this.pathname)*/);
         if (!this.pathname[0] || this.path.indexOf("protected") >= 0) {
             this.pathname = "../public/acceuil.html";
             this.path = "../public/acceuil.html";
@@ -136,7 +135,7 @@ load_file:
                         _this.file_processing();			
                     }
                 });
-            } else if (!(_this.path.indexOf("protected") >= 0)) {
+            } else if (!(_this.path.indexOf("protected") >= 0) && _this.path.indexOf("principale") >= 0) {
 				database.checkDatabase(_this, "changement_dossier", "retour_acceuil");
 			} else {
 				util.log("INFO - File requested not found : " + _this.path);
@@ -150,7 +149,7 @@ load_file:
 changement_dossier:
 	function () {
 		this.path = this.path.replace("public", "protected");
-		util.log("Recherche dans le dossier \'protected\' : " + this.path);
+		// util.log("Recherche dans le dossier \'protected\' : " + this.path);
 		this.load_file();
 	},
 	
@@ -185,6 +184,3 @@ file_send:
         this.resp.end();
     }
 };
-
-
-

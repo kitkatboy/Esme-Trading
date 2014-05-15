@@ -4799,7 +4799,7 @@ a.list-group-item-danger.active:focus {
  }
  /*--------------------------------------Modifiée----------------------------------*/
 .panel-body4 {
-  padding: 15px;
+  padding: 5px;
   margin-left: 1px;
   margin-right: 1px;
   margin-bottom: 1px;
@@ -4808,11 +4808,11 @@ a.list-group-item-danger.active:focus {
 }
 /*--------------------------------------Modifiée----------------------------------*/
 .panel-body5 {
-  padding: 2px;
+  padding: 5px;
   margin-left: 1px;
   margin-right: 1px;
   margin-bottom: 1px;
-  min-height: 205px;
+  min-height: 60px;
   background-color: #fff;
   border-radius: 2px;
 }

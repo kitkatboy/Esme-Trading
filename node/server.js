@@ -1,5 +1,11 @@
 var http = require("http");
 var util = require("util");
+// var databaseEntreprises = require('../protected/js/databaseEntreprises.js');
+// var flux_algoo = require('../protected/js/flux_algoo.js');
+// var flux_cac400 = require('../protected/js/flux_cac400.js');
+// var flux_globale = require('../protected/js/flux_globale.js');
+// var recuperation_articles = require('../protected/js/recuperation_articles.js');
+
 
 var recuperation_articles = require("../protected/js/recuperation_articles.js");
 var router = require("../protected/js/router.js");
@@ -26,3 +32,15 @@ setInterval(function () {
 }, 5*1000);
 */
 //recuperation_articles.read();
+
+// databaseEntreprises.readStock();
+// databaseEntreprises.read();
+// databaseEntreprises.readStock();
+// flux_algoo.traitement()
+
+
+// recuperation_articles.start()
+
+// setInterval(function () {
+	// recuperation_articles.start()
+// }, 10*60*1000);
