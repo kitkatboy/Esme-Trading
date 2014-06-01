@@ -6,15 +6,15 @@ server.base = [];
 server.fe = 0;
 server.articles = [];
 
-var readbase = function(input){
+var readbase = function(e,input){
 	for(i in input)
 	{
 		server.fe++;
-		readwrite.readfile("../protected/articlesfr/"+input[i].entreprise.substring(0, input[i].entreprise.length - 1)+" - "+input[i].titre.substring(1)+".txt",envoi);
+		readwrite.readFile("../protected/articlesfr/"+input[i].entreprise.substring(0, input[i].entreprise.length - 1)+" - "+input[i].titre.substring(1)+".txt",'utf-8',envoi);
 	}
 };
-var envoi = function(article){
-	server.articles[server.articles.length] = article;
+var envoi = function(e,article){
+	server.articles[server.articles.length] = JSON.parse(article);
 	if(!--server.fe){
 		server.that[server.fonc](server.articles);
 		server.articles.length = 0;
@@ -25,5 +25,5 @@ exports.start = function(that, fonc){
 	server.fonc = fonc;
 	server.that = that;
 	
-	readwrite.bd("SELECT * FROM basearticle ORDER BY date DESC","../protected/basearticle.db",readbase);
+	readwrite.each("../protected/basearticle.db","SELECT * FROM basearticle ORDER BY date DESC",readbase);
 };

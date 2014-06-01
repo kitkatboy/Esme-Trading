@@ -24,7 +24,7 @@ server.readdico = function(){
 		if(e) {
 			util.log("ERROR Dictionnaire principal : " + e);
 		} else if (d) {
-			server.dico = JSON.parse(d); // Chargement du dictionnaire de mots dans une variable
+			server.dico = d; // Chargement du dictionnaire de mots dans une variable
 			util.log("Dictionnaire principal charge");
 			//server.charge--;
 			ev.emit("ok");
@@ -39,7 +39,7 @@ server.readdico2 = function(){
 		if(e) {
 			util.log("ERROR Dictionnaire adj : " + e);
 		} else if (d) {
-			server.dico2 = JSON.parse(d); // Chargement des adjectifs dans une variable
+			server.dico2 = d; // Chargement des adjectifs dans une variable
 			
 			util.log("Dictionnaire adj charge");
 			//server.charge--;
@@ -77,7 +77,7 @@ server.readdicoapp = function(){
 		if(e) {
 			util.log("=(");
 		} else {
-			server.dicoapp = JSON.parse(d);
+			server.dicoapp = d;
 			
 			util.log("dicoapp charge");
 			ev.emit("travailapp");
@@ -222,14 +222,19 @@ exports.create = function () {
 
 //-------------------------------------apprentissage-------------------------------
 server.app = function(note, nouvmots){
-	//util.log(util.inspect(nouvmots));
+	var tmp = "";
 	 for(i in nouvmots){
 		//nouvmots[i] = {};
+		tmp = nouvmots[i]+'';
+		server.dicoapp[tmp]="";
+		util.log(i);
 		
-		if(!server.dicoapp[nouvmots[i]]){
-			server.dicoapp[nouvmots[i]]={};
-			server.dicoapp[nouvmots[i]].note = note;
-			server.dicoapp[nouvmots[i]].nb = 1;
+		if(!server.dicoapp[tmp]){
+			server.dicoapp[tmp]="";
+			server.dicoapp[tmp].note={};
+			// util.log(nouvmots[i]);
+			server.dicoapp[tmp].note = note;
+			server.dicoapp[tmp].nb = 1;
 			//util.log(nouvmots[i] +" : "+ util.inspect(server.dicoapp[nouvmots[i]]));
 		}
 		else{
@@ -300,8 +305,8 @@ server.note23 = function(article){
 			
 		}*/
 	}//util.log("tmp = " +util.inspect(tmp2));
-	//util.log("note : "+article.note);
-	ev.emit("apprend",article.note,tmp2);
+	util.log("note : "+article.note);
+	// ev.emit("apprend",article.note,tmp2);
 	ev.emit("miseajourdatabase",article);
 	//ev.emit("miseajourdatabase",article);
 	//server.write(article);
@@ -356,8 +361,10 @@ exports.initlisner = function(){
 	util.log("Les listener sont initialises");
 	
 };
-
-
+exports.start();
+setInterval(function () {
+	exports.start();
+}, 5*60*1000);
 
 //exports.create();
 //server.addnote();

@@ -1,28 +1,29 @@
 var sqlite3 = require("sqlite3").verbose();
-var db = new sqlite3.Database("../protected/database.db");
+var db = "../protected/database.db";
 var util = require("util");
 var event = require('events');
 var ev = new event.EventEmitter();
+var readwrite = require("./readwrite.js");
 
-create = function () {
-	db.run("CREATE TABLE database (mail TEXT, id TEXT, mdp TEXT, log_temp TEXT, date TEXT)");
-    db.close();
-};
+// create = function () {
+	// db.run("CREATE TABLE database (mail TEXT, id TEXT, mdp TEXT, log_temp TEXT, date TEXT)");
+    // db.close();
+// };
 
 insert = function (obj, fonction) {
 var new_date = new Date();
 	// console.log("Enregistrement du compte");
-	db.serialize( function () {
-		var stmt = db.prepare("INSERT INTO database VALUES (?,?,?,?,?)");
-		stmt.run(obj.mail, obj.id, obj.mdp, "null", new_date.valueOf());
-		stmt.finalize();
-	});
+	readwrite.dbwrite5(db,"INSERT INTO database VALUES (?,?,?,?,?)",obj.mail, obj.id, obj.mdp, "null", new_date.valueOf(),function () {});
+		// var stmt = db.prepare("INSERT INTO database VALUES (?,?,?,?,?)");
+		// stmt.run(obj.mail, obj.id, obj.mdp, "null", new_date.valueOf());
+		// stmt.finalize();
+	// });
 	obj[fonction]("Votre compte est créé");
 };
 
 exports.verifMail = function (obj, fonction) {
 	var stmt = "SELECT mail FROM database WHERE mail = \'" + obj.mail + "\'";
-	db.get(stmt, function (e, r) {
+	readwrite.get(db,stmt, function (e, r) {
 		if(e) {
 			util.log("ERROR - " + e);
 		} else if(r) {
@@ -37,7 +38,7 @@ exports.verifMail = function (obj, fonction) {
 
 verifId = function (obj, fonction) {
 	var stmt = "SELECT id FROM database WHERE id = \'" + obj.id + "\'";
-	db.get(stmt, function (e, r) {
+	readwrite.get(db,stmt, function (e, r) {
 		if(e) {
 			util.log("ERROR - " + e);
 		} else if(r) {
@@ -55,14 +56,15 @@ exports.verifLogin = function (obj, fonction) {
 	var new_date = new Date();
 	// console.log("Variables : " + new_log_temp + " " + new_date);
 	var stmt = "SELECT id FROM database WHERE id=\'" + obj.id + "\' AND mdp=\'" + obj.mdp + "\'";
-	db.get(stmt, function (e, r) {
+	readwrite.get(db,stmt, function (e, r) {
 		if(e) {
 			util.log("ERROR - " + e);
 		} else if(r){
 			// console.log("Connexion etablie");
-			var stmt2 = db.prepare("UPDATE database SET log_temp = \'"+new_log_temp+"\', date = "+new_date.valueOf()+" WHERE id = \'" + obj.id + "\'");
-			stmt2.run();
-			stmt2.finalize();
+			readwrite.dbwrite1(db,"UPDATE database SET log_temp = \'"+new_log_temp+"\', date = "+new_date.valueOf()+" WHERE id = \'" + obj.id + "\'",function(){});
+			// var stmt2 = db.prepare("UPDATE database SET log_temp = \'"+new_log_temp+"\', date = "+new_date.valueOf()+" WHERE id = \'" + obj.id + "\'");
+			// stmt2.run();
+			// stmt2.finalize();
 			obj[fonction]("Login ok", new_log_temp);
 		} else {
 			// console.log("Identifiant ou mot de passe invalide");
@@ -73,20 +75,22 @@ exports.verifLogin = function (obj, fonction) {
 
 exports.checkDatabase = function (obj, function1, function2) {
 	var log_temp = obj.req.headers.cookie;
-	// util.log("Identifiant temporaire : " + log_temp);	
-	db.serialize(function () {
+	util.log("Identifiant temporaire : " + log_temp);	
+	// db.serialize(function () {
 		var new_date = new Date();
 		var stmt = "SELECT id,date FROM database WHERE log_temp = " + log_temp;
-		db.get(stmt, function (e, r) {
+		util.log(log_temp);
+		readwrite.get(db,stmt, function (e, r) {
 			//util.log("-----------------------" + util.inspect(r));
 			if (e) {
 				util.log("ERROR - " + e);
 			} else if (r) {
 				if (((new_date.valueOf() - r.date)/(1000)) < 10*60) {
-					// util.log("Actualisation de la date du login temporaire");
-					var stmt2 = db.prepare("UPDATE database SET date = "+new_date.valueOf()+" WHERE log_temp = " + log_temp);
-					stmt2.run();
-					stmt2.finalize();
+					util.log("Actualisation de la date du login temporaire");
+					readwrite.dbwrite1(db,"UPDATE database SET date = "+new_date.valueOf()+" WHERE log_temp = " + log_temp,function(){});
+					// var stmt2 = db.prepare("UPDATE database SET date = "+new_date.valueOf()+" WHERE log_temp = " + log_temp);
+					// stmt2.run();
+					// stmt2.finalize();
 					obj[function1](r.id);
 				} else {
 					// util.log("La date de l'identifiant temporaire n'est plus valide");
@@ -97,15 +101,16 @@ exports.checkDatabase = function (obj, function1, function2) {
 				obj[function2]();
 			}
 		});
-	});
+	// });
 };
 
 exports.erase_log = function (obj, fonction) {
 	var new_log = "NonConnecté";
 	// console.log("Effacement loggin temporaire dans la base de donnée");
-	var stmt = db.prepare("UPDATE database SET log_temp = \'"+new_log+"\' WHERE log_temp = \'" +obj.log_temp+ "\'")
-	stmt.run();
-	stmt.finalize();
+	readwrite.dbwrite1(db,"UPDATE database SET log_temp = \'"+new_log+"\' WHERE log_temp = \'" +obj.log_temp+ "\'",function(){});
+	// var stmt = db.prepare("UPDATE database SET log_temp = \'"+new_log+"\' WHERE log_temp = \'" +obj.log_temp+ "\'")
+	// stmt.run();
+	// stmt.finalize();
 	obj[fonction]("Deconnexion");
 };
 

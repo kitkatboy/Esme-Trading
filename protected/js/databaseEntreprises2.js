@@ -46,71 +46,86 @@ exports.readAlgo = function (nom, objet, fonction, num_entreprise) {
 //------------------------------------------------------------------------------------------------------------------	
 
     var stmt = "SELECT day FROM databaseEntreprises WHERE name ="+"'"+nom+"'";
-    db.each(stmt, function (e, r) {
-		a.push(+r.day);
-	}, function () {
+    readwrite.each(db,stmt, function (e, r) {
+		for(i in r){
+			a.push(+r[i].day);
+		}
 		dernier_jour = Math.max.apply(null, a);
 	//	console.log("dernier jour "+dernier_jour);
 	
 //------------------------------------------------------------------------------------------------------------------	
-		var stmt2 = "SELECT id FROM databaseEntreprises WHERE day ="+"'"+dernier_jour+"'"+" AND name ="+"'"+nom+"'";
-		db.each(stmt2, function (e, r) {
-			b.push(+r.id);
-		}, function () {
+		var smtt = "SELECT id FROM databaseEntreprises WHERE day ="+"'"+dernier_jour+"'"+" AND name ="+"'"+nom+"'";
+		readwrite.each(db,smtt, function (e, r) {
+			
+			for(i in r){
+				b.push(+r[i].id);
+			}
 			output.premier_id_jour = Math.min.apply(null, b);
 			output.dernier_id_jour = Math.max.apply(null, b);
 //------------------------------------------------------------------------------------------------------------------	
 			var avant_dernier_jour = dernier_jour - 1;
-			var stmt3 = "SELECT id FROM databaseEntreprises WHERE day ="+"'"+avant_dernier_jour+"'"+" AND name ="+"'"+nom+"'";
-			db.each(stmt3, function (e, r) {
-				c.push(+r.id);
-			}, function () {
+			var sttm = "SELECT id FROM databaseEntreprises WHERE day ="+"'"+avant_dernier_jour+"'"+" AND name ="+"'"+nom+"'";
+			readwrite.each(db,sttm, function (e, r) {
+				for(i in r){
+					c.push(+r[i].id);
+				}
 				output.dernier_id_semaine = Math.max.apply(null, c);
 //------------------------------------------------------------------------------------------------------------------	
 				var avant_dernier_jours = dernier_jour - 5;
-				var stmt4 = "SELECT id FROM databaseEntreprises WHERE day ="+"'"+avant_dernier_jours+"'"+" AND name ="+"'"+nom+"'";
-				db.each(stmt4, function (e, r) {
-					c.push(+r.id);
-				}, function () {
+				var sttm = "SELECT id FROM databaseEntreprises WHERE day ="+"'"+avant_dernier_jours+"'"+" AND name ="+"'"+nom+"'";
+				readwrite.each(db,sttm, function (e, r) {
+					for(i in r){
+						c.push(+r[i].id);
+					}
 					output.premier_id_semaine = Math.min.apply(null, c);		
 //------------------------------------------------------------------------------------------------------------------
 					var avant_dernier_jour = dernier_jour - 1;
-					var stmt5 = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+output.dernier_id_semaine+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+avant_dernier_jour+"'";
-					db.each(stmt5, function (e, r) {
-						output.derniere_valeure_semaine = r.value;
-					}, function () {
+					var tsmt = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+output.dernier_id_semaine+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+avant_dernier_jour+"'";
+					readwrite.each(db,tsmt, function (e, r) {
+						for(i in r){
+							output.derniere_valeure_semaine = r[i].value;
+						}
 				
 //------------------------------------------------------------------------------------------------------------------
 						var avant_dernier_jours = dernier_jour - 5;
-						var stmt6 = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+output.premier_id_semaine+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+avant_dernier_jours+"'";
-						db.each(stmt6, function (e, r) {
-						output.premiere_valeure_semaine = r.value;
-						}, function () {
+						var stmtr = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+output.premier_id_semaine+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+avant_dernier_jours+"'";
+						readwrite.each(db,stmtr, function (e, r) {
+						for(i in r)
+							output.premiere_valeure_semaine = r[i].value;
+						}
 				
 //------------------------------------------------------------------------------------------------------------------	
-							var stmt7 = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+dernier_id_jour+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+dernier_jour+"'";
-							db.each(stmt7, function (e, r) {
-							output.derniere_valeure_jour = r.value;
-							}, function () {
+							var tsmt = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+dernier_id_jour+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+dernier_jour+"'";
+							readwrite.each(db,tsmt, function (e, r) {
+							for(i in r){
+								output.derniere_valeure_jour = r[i].value;
+							}
 
 //------------------------------------------------------------------------------------------------------------------	
 								var dernier_jour_semaine = dernier_jour - 1;
 								var premier_jour_semaine = dernier_jour - 5;
-								var stmt8 = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+premier_id_jour+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+dernier_jour+"'";
-								db.each(stmt8, function (e, r) {
-								output.premiere_valeure_jour = r.value;
-								}, function () {
+								var stmtr = "SELECT value FROM databaseEntreprises WHERE id ="+"'"+premier_id_jour+"'"+" AND name ="+"'"+nom+"'"+" AND day ="+"'"+dernier_jour+"'";
+								readwrite.each(db,stmtr, function (e, r) {
+								for(i in r){
+									output.premiere_valeure_jour = r[i].value;
+								}
 
 //------------------------------------------------------------------------------------------------------------------	
-									var stmt9 = "SELECT value FROM databaseEntreprises WHERE day BETWEEN"+"'"+premier_jour_semaine+"'"+" AND "+"'"+dernier_jour_semaine+"'"+" AND name ="+"'"+nom+"'";
-									db.each(stmt9, function (e, r) {
-									 nbr++;
-									}, function () {
+									var stmtr = "SELECT value FROM databaseEntreprises WHERE day BETWEEN"+"'"+premier_jour_semaine+"'"+" AND "+"'"+dernier_jour_semaine+"'"+" AND name ="+"'"+nom+"'";
+									readwrite.each(db,stmtr, function (e, r) {
+									for(i in r){
+										nbr++;
+									}
+									 
+									
 										output.nbr_valeure_semaine = nbr;
 //------------------------------------------------------------------------------------------------------------------	
-										var stmt10 = "SELECT value FROM databaseEntreprises WHERE day ="+"'"+dernier_jour+"'"+" AND name ="+"'"+nom+"'";
-										db.each(stmt10, function (e, r) {
-										 cpt++;
+										var stmtr = "SELECT value FROM databaseEntreprises WHERE day ="+"'"+dernier_jour+"'"+" AND name ="+"'"+nom+"'";
+										readwrite.each(db,stmtr, function (e, r) {
+										for(i in r){
+											cpt++;
+										}
+										 
 										}, function () {
 											output.nbr_valeure_jour = cpt;
 											output.nom=nom;
@@ -136,22 +151,25 @@ exports.readWeek = function (obj, fonction, nom, data, vecteur_semaine, vecteur_
 	var a = new Array;
 	var vecteur = {};
 	var stmt = "SELECT day FROM databaseEntreprises WHERE name ="+"'"+nom+"'";
-    db.each(stmt, function (e, r) {
-		a.push(+r.day);
-	}, function () {
+    readwrite.each(db,stmt, function (e, r) {
+	for(i in r){
+		a.push(+r[i].day);
+	}
 		var dernier_jour = Math.max.apply(null, a);
 		var dernier_jour_semaine = dernier_jour - 1;
 		var premier_jour_semaine = dernier_jour - 5;
 //---------------------------------------------------------------------------------------------------------
-		var stmt11 = "SELECT value FROM databaseEntreprises WHERE day BETWEEN"+"'"+premier_jour_semaine+"'"+"AND"+"'"+dernier_jour_semaine+"'"+"AND name ="+"'"+nom+"'";
-		db.each(stmt11, function (e, r) {
-			semaine.push(r.value);		
-		}, function () {				
+		var sttm = "SELECT value FROM databaseEntreprises WHERE day BETWEEN"+"'"+premier_jour_semaine+"'"+"AND"+"'"+dernier_jour_semaine+"'"+"AND name ="+"'"+nom+"'";
+		readwrite.each(db,sttm, function (e, r) {
+		for(i in r){
+			semaine.push(r[i].value);		
+		}				
 //---------------------------------------------------------------------------------------------------------	
-			var stmt12 = "SELECT value FROM databaseEntreprises WHERE day ="+"'"+dernier_jour+"'"+" AND name ="+"'"+nom+"'";
-			db.each(stmt12, function (e, r) {
-				jour.push(r.value);		
-			}, function () {
+			var tsmt = "SELECT value FROM databaseEntreprises WHERE day ="+"'"+dernier_jour+"'"+" AND name ="+"'"+nom+"'";
+			readwrite.each(db,tsmt, function (e, r) {
+			for(i in r){
+				jour.push(r[i].value);		
+			}
 				vecteur.semaine = semaine;
 				vecteur.jour = jour;
 				//console.log(vecteur);
@@ -174,7 +192,7 @@ exports.readAll = function (that, fonc, nom) {
 	var day = 0;
 	var maxDay =0;
 	
-	fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) {
+	readbase.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) {
 		if(err) {
 			console.log(err);
 		} else if (data) {
@@ -287,62 +305,7 @@ exports.readAll = function (that, fonc, nom) {
 		});
 	});
 };
-//--------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------
-/*
-exports.readStock = function () {
-	var c = new Array;
-	var j = 0;
-	var nbr =0;
-	var json = new Array();
 
-	db.get("SELECT MAX(id), id FROM databaseEntreprises", function (e, r){ // todo max id
-		if (e) {
-			util.log("ERROR : " + e);
-		} else if (r) {
-			var maxId = r.id;
-			// console.log(maxId);
-		}	
-		stmt = "SELECT name, value FROM databaseEntreprises WHERE id = "+"'"+maxId+"'";
-		db.each(stmt, function (e, r) {
-		if (e) {
-			util.log("ERROR : " + e);
-		} else if (r) {
-			c.push(r.name);
-			c.push(parseFloat(r.value));
-			nbr++;
-		}},function () {
-			// console.log(c);
-			for(var i=0; i < 2*nbr; i++) 
-			{	var b = {};
-				b.name=c[i];
-				b.value=c[i+1];
-				json.push(b); 
-				i++;
-			}
-			fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) {	
-				if(err) {
-					console.log(err);
-				} else if (data) {
-					data = JSON.parse(data);
-					for(i=0; i<data.nom.length; i++) {
-						if(json[i]){
-							json[i].name = data.nom[i].name;
-						}
-					}
-					console.log(json);
-					fs.writeFile("../protected/stock.json", JSON.stringify(json), 'utf8', 'a+', function(err){
-					if(err) throw err;
-					console.log('we just saved the buffer in a file');
-					}); 
-				
-				}
-			});
-					
-		});
-	});
-};
-*/
 exports.readStock = function () {
 	var name = "";
 	var name2 = "";
@@ -396,41 +359,5 @@ exports.readStock = function () {
 				}
 			});
 		}
-	}/*, function () {
-		// --------------------------------------------- Pr entreprises_cac40.js --------------------------------------
-		// console.log(cpt2);
-		json.nom = tmp;
-		// console.log(json);
-		
-		// TO DO fichier entreprises_cac40.json
-		fs.writeFile("../protected/entreprises_cac40.json", JSON.stringify(json), "UTF-8",function (e){
-			if (e) {
-				util.log("ERROR - Ecriture " + _this.nom_json + " : " + e);
-			}
-		});
-	}*/);
-};
-/*
-exports.read = function () {
-	var cpt = 0;
-	stmt = "SELECT value FROM databaseEntreprises WHERE name = 'L''Oreal SA (OR.PA)'";
-    db.each(stmt, function (e, r) {
-		if (e) {
-			util.log("ERROR : " + e);
-		} else if (r) {
-			cpt++;
-			console.log(r);
-			console.log(cpt);
-		}
 	});
 };
-*/
-//------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------
-// exports.readStock();
-// exports.stock(null, ['Essilor International SA', 'Accor SA'], null, null);
-//exports.readWeek(null, null,'Essilor International SA (EI.PA)', null, null, null, null);
-//exports.create();
-//exports.insert({"id" : 2, "nom" : "ALTRAN", "valeur" : 54, "jour": 1});
-// exports.readAll(null, null,'Air Liquide SA');
-// exports.readAlgo('Essilor International SA', null, null, null);

@@ -3,96 +3,151 @@ var http = require('http');
 var fs = require("fs");
 var events = require("events");
 var ev = new events.EventEmitter();
+exports.evx = new events.EventEmitter();
 var sqlite3 = require("sqlite3").verbose();
+//var child = require('child_process').fork('../protected/js/chil_readwrite.js');
 
+//ev.setMaxListeners(100);
 var pile = [];
+process.on('message', function(m) {
+// util.log(util.inspect(m));
+	ev.emit(m.callback,m.e,m.output);
+});
 
-exports.bd = function(etype,enom,ecallback){
-	pile[pile.length] = {};
+exports.each = function(enom,etype,ecallback){
+
+	tmp = {}
+	tmp.rw = "readall";
+	tmp.nom = enom;
+	tmp.type = etype;
 	
-	pile[pile.length-1].rw = "read";
-	pile[pile.length-1].nom = enom;
-	pile[pile.length-1].type = etype;
-	pile[pile.length-1].callback = ecallback;
-	
-	if(pile.length == 1)
-	{
-		gestion();
-	}
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+	//child.send(tmp);
+};
+exports.get = function(enom,etype,ecallback){
+	tmp = {};
+	tmp.rw = "read";
+	tmp.nom = enom;
+	tmp.type = etype;
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+	//child.send(tmp);
 };
 exports.readfile = function(enom,ecallback){
+	tmp = {};
 	
-	pile[pile.length] = {};
+	tmp.rw = "read";
+	tmp.nom = enom;
+	tmp.type = "";
+	tmp.callback = "";
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
+	tmp.callback = Math.floor(Math.random()*10000000000);
+	//tmp.callback = JSON.stringify(tmp.callback);
+	//util.log(tmp.callback);
 	
-	pile[pile.length-1].rw = "read";
-	pile[pile.length-1].nom = enom;
-	pile[pile.length-1].type = "";
-	pile[pile.length-1].callback = ecallback;
-	
-	if(pile.length == 1)
-	{
-		gestion();
-	}
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+	//child.send(tmp);
 
 };
-//Fonction de gestion de la pile
-var gestion = function(){
-	if(pile[0].rw == "read" && pile[0].type == "")
-	{
-		read(pile[0].nom,pile[0].callback);
-	}
-	else if(pile[0].rw == "read")
-	{
-		readbase(pile[0].nom,pile[0].type,pile[0].callback);
-	}
-};
-//Fonction de depillement
-var depile = function(){
-	for(var i=0;i<(pile.length-1);i++)
-	{
-		pile[i] = pile[i+1];
-	}
+
+exports.readFile = function(enom,format,ecallback){//true
+	tmp = {};
+	tmp.format = format;
+	tmp.rw = "readFile";
+	tmp.nom = enom;
+	tmp.output = 0;
+	tmp.e = 0;
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
 	
-	pile.length = pile.length-1;
-	
-	if(pile.length != 0)
-	{
-		gestion();
-	}
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
 };
-//fonction de chargement d'un ficher
-var read = function(nom,callback){
-	var output;
-	fs.readFile(nom,"UTF-8", function(e,d){
-		if(e) {
-			util.log("ERROR "+nom+" : " + e);
-			depile();
-		} else if (d) {
-			output = JSON.parse(d); // Chargement du dictionnaire de mots dans une variable
-			util.log(nom+" charge");
-			depile();
-			callback(output);
-		}
-	});
+
+exports.writeFile = function(enom,arg,format,ecallback){
+	tmp = {};
+	tmp.format = format;
+	tmp.rw = "writeFile";
+	tmp.nom = enom;
+	tmp.arg = arg;
+	tmp.output = 0;
+	tmp.e = 0;
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));;
 	
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
 };
-//fonction de chargement d'une base de donnée
-var readbase = function(nom,type,callback){
-	var i = 0;
-	var stmt = type;
-	var base = [];
-	var db = new sqlite3.Database(nom);
-    db.each(stmt, function (e, r) {
-		if(e){
-			util.log("ERROR Base de donnees : " + e);
-			depile();
-		} else if (r) {
-			base[i] = r;
-			i++;
-		}
-    },function(){
-		util.log(nom + " charge");
-		callback(base);
-		depile();
-	});		
+
+
+
+exports.dbwrite5 = function(enom,req,arg1,arg2,arg3,arg4,arg5,ecallback){
+	tmp = {};
+	tmp.rw = "write5";
+	tmp.nom = enom;
+	tmp.type = req;
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
+	tmp.arg1 = arg1;
+	tmp.arg2 = arg2;
+	tmp.arg3 = arg3;
+	tmp.arg4 = arg4;
+	tmp.arg5 = arg5;
+	
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+	//child.send(tmp);
+
+};
+exports.dbwrite1 = function(enom,req,ecallback){
+	//util.log(ecallback);
+	tmp = {};
+	tmp.rw = "write1";
+	tmp.nom = enom;
+	tmp.type = req;
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
+	
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+	//child.send(tmp);
+
+};
+exports.dbwrite4 = function(enom,req,arg1,arg2,arg3,arg4,ecallback){
+	tmp = {};
+	tmp.rw = "write4";
+	tmp.nom = enom;
+	tmp.type = req;
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
+	tmp.arg1 = arg1;
+	tmp.arg2 = arg2;
+	tmp.arg3 = arg3;
+	tmp.arg4 = arg4;
+	
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+
+};
+exports.exists = function(enom,ecallback){
+	tmp = {};
+	tmp.rw = "exist";
+	tmp.nom = enom;
+	tmp.callback = (enom+Math.floor(Math.random()*10000000000));
+		tmp.output = 0;
+	tmp.e = 0;
+
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+};
+
+exports.insert = function(enom,arg,ecallback){
+	tmp = {};
+	tmp.rw = "insert";
+	tmp.nom = enom;
+	tmp.callback =(enom+Math.floor(Math.random()*10000000000));
+	tmp.arg = arg;
+	
+	ev.once(tmp.callback,ecallback);
+	process.send(tmp);
+
 };

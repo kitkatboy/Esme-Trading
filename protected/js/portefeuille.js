@@ -1,5 +1,5 @@
 var util = require("util");
-var fs = require("fs");
+var fs = require("./readwrite.js");
 
 exports.traitement = function (id, obj) {
 	var portefeuille = new constr_portefeuille(id, obj);

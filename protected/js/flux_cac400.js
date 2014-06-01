@@ -4,7 +4,7 @@ var net = require('net');
 // var demarrage = require('./flux_json.js');
 var db = require('./databaseEntreprises.js');
 var fin=require('./flux_algoo.js');
-var fs = require('fs');
+var fs = require('fs');//to do
 var EventEmitter = require('events').EventEmitter;
 var emetteur = new EventEmitter();
 var server = {}; // creation d'un objet qui va contenir des variables et des fonction 
@@ -30,7 +30,7 @@ server.extractionDonees=function(i){
 var symboles="";
 var nom="";
  //lecture du json contenue dans le fichier pour acceder aux données qu'il contiens 
-		fs.readFile('../protected/entreprises_cac40.json', 'utf-8', 'r+', function (err, data) { //----------------------------------------------------------GREG
+		fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, data) { //----------------------------------------------------------GREG
 			if (err) {
 				console.log("ERROR - " + err);
 			} else if (data) {

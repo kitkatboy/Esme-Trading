@@ -82,8 +82,12 @@ pri.search = function (click_ent) {
 	var article = document.getElementById("article"+i);
 	
 	if (click_ent) {
+	
+		var reg = new RegExp("é", "g");
+		click_ent = click_ent.replace(reg, "e");
+		
 		if (click_ent == "Compagnie de Saint-Gobain") {
-			entreprise = click_ent.toLowerCase();
+			entreprise = "saint gobain";
 		} else if (click_ent == "Electricité de France S.A.") {
 			entreprise = "edf";
 		} else {
@@ -454,7 +458,7 @@ pri.logique = function() {
 		var data = {act: "logique_flou", search: pri.name_ent};
 		client.post(data, pri.logique_back);
 	} else if (pri.name_ent == "CAC 40" || pri.name_ent == ""){ //-----------------------------------------------------------------------------------------------------
-		var data = {act: "logique_flou", search: "Alstom SA"};
+		var data = {act: "logique_flou", search: ""};
 		client.post(data, pri.logique_back);
 	}
 };
@@ -469,16 +473,20 @@ pri.logique_back = function() {
 		// var traitment = r.resp;
 		var output = "";
 		var tmp = 0;
+		var cpt = 0;
 		
 		 // console.log(r.resp);
 		// console.log(r.resp.jour);
 		// console.log(r.resp.semaine);
 		
+		output = '<div style="margin-top:-20px;">';
+		
 		if (r.resp) {
 			for (j in r.resp) {
+				cpt++;
 			 // console.log(j);
 				traitment = r.resp[j].r.jour;
-				output +='<div class="col-xs-12" style="padding:0px; padding-bottom:5px;">' +
+				output +='<div class="col-xs-12" style="padding:0px;">' +
 							'<div class="col-xs-3" style="padding-right:0px;"><small><strong><font color="blue">'+j+'</font></strong></small></div>'+
 							'<div class="col-xs-5">';
 
@@ -500,7 +508,12 @@ pri.logique_back = function() {
 					output += '<small>'+tps+' : '+prev_mont+" certitude "+tmp+'%.</small><br/>';
 					
 					traitment = r.resp[j].r.semaine;
-					tps = "Semaine";
+					
+					if (tps == "Journée") {
+						tps = "Semaine";
+					} else {
+						tps = "Journée";
+					}
 				}
 				
 				output += '</div>' +
@@ -533,8 +546,18 @@ pri.logique_back = function() {
 											'</div>' +
 										'</div>' +
 									'</ul>' +
-								'</div>' +
-						'</div><hr/ style="margin-top:10px; margin-bottom:0px;"><hr/>';
+								'</div><hr/><hr/ style="margin-bottom:5px;">' +
+						'</div><hr/><hr/>';
+						
+						// break;
+			}
+			
+			output += '</div><hr/ style="margin-top:24px;';
+			
+			if (cpt == 1) {
+				output += 'margin-bottom:-10px;">';
+			} else {
+				output += '">';
 			}
 
 			document.getElementById('logique').innerHTML = output;
@@ -693,3 +716,5 @@ pri.cammenbert = function (donnees) {
 window.onload = function () {
     setTimeout(pri.init, 1);
 };
+
+// setInterval(pri.init, 1);

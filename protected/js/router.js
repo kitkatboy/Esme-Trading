@@ -1,6 +1,7 @@
 var util = require("util");
 var url = require("url");
-var fs = require("fs");
+var fs = require("./readwrite.js");
+// var fs = require("fs");
 var post = require('./post.js');
 var database = require('./database.js');
 
@@ -125,13 +126,14 @@ load_file:
 		/* Le systeme vérifie si le chemin (this.path) donné en argument existe */
         fs.exists(this.path, function (exist) {
             if (exist) {
-                fs.readFile(_this.path, function (error, contenu) {
+			
+                fs.readFile(_this.path,'binary', function (error, contenu) {
                     if (error) {
                         util.log("ERROR - Internal Server Error : " + error);
 						_this.resp.writeHead(500, {"Content-Type": "text/html"});
 						_this.resp.end();
                     } else {
-                        _this.file = contenu; // On attribue la valeur trouvée "contenu" à la variable "_file"					
+                        _this.file = contenu; // On attribue la valeur trouvée "contenu" à la variable "_file"	
                         _this.file_processing();			
                     }
                 });
@@ -171,6 +173,7 @@ file_processing:
 		* Retourne -1 si l'argument (ici filetype) n'est pas dans la chaîne testé (ici image_file)
 		*/
 		else if (this.image_file.indexOf(this.filetype) >= 0) {
+			// console.log(this.path);
             this.resp.writeHead(200, { "Content-Type" : "image/" + this.filetype });
         } else { 
             this.resp.writeHead(200, { "Content-Type" : "text/" + this.filetype });
@@ -180,7 +183,8 @@ file_processing:
 
 file_send:
     function () {
-        this.resp.write(this.file); // Affichage du contenu
+		// util.log(util.inspect(this.file));
+        this.resp.write(this.file,"binary"); // Affichage du contenu
         this.resp.end();
     }
 };

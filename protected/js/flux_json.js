@@ -1,6 +1,6 @@
 var util = require('util');
 var http = require('http');
-var fs = require('fs');
+var fs = require('./readwrite.js');
 var EventEmitter = require('events').EventEmitter;
 var evenement = new EventEmitter();
 var server = {}; // creation d'un objet qui va contenir des variables et des fonction 
@@ -54,10 +54,14 @@ evenement.on("symbole", function(b, i){
 /////////////////////////////////////////////////////////////////////////////////////////////////
 evenement.on("entregistreDansJson", function(entreprises){
 // entregistrement des données 
-	fs.writeFile("../protected/entreprises_cac40.json", JSON.stringify(entreprises), 'utf8', 'a+', function(err){ //TODO
-		if(err) throw err;
-		console.log('on a enregister le buffer dans un fichier');
-		
+	fs.writeFile("../protected/entreprises_cac40.json", JSON.stringify(entreprises), 'utf8', function(err){ //TODO
+		if(err)
+		{
+			util.log(err);
+		}
+		else{
+			console.log('on a enregister le buffer dans un fichier');
+		}
 	}); 
 
 

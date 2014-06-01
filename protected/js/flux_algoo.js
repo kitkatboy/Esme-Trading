@@ -1,7 +1,7 @@
 var util = require('util');
 var http = require('http');
 var db = require('./databaseEntreprises.js');
-var fs = require('fs');
+var fs = require('./readwrite.js');
 var EventEmitter = require('events').EventEmitter;
 var event = new EventEmitter();
 var savePoids = new EventEmitter();
@@ -15,20 +15,20 @@ server.calcul= function(num_entreprise)
 { 
 	if(num_entreprise<40)
 	{
-				fs.readFile('../protected/entreprises_cac40.json', 'utf-8', 'r+', function (err, d) {
-				if (err) throw err;
+				fs.readFile('../protected/entreprises_cac40.json', 'utf-8', function (err, d) {
+				if (err) util.log(err);
 				d = JSON.parse(d);
 				var nom= d.nom[num_entreprise].nom;
 				console.log(nom);
 				db.readAlgo(nom, server, "calcul_droites", num_entreprise);			
 				});			
 	}else{
-					fs.writeFile("../protected/tmpFichier.json", "hello", function(err){ 
-					if(err) throw err;
-					console.log('fin du traitement ...');
-					console.log('on a creer le fichier temporaire tmpFichier'); // pour dire qu'on peut lire librement dans la databaseEntreprises ( voir fonction readALL de databaseEntreprises)
+					// fs.writeFile("../protected/tmpFichier.json", "hello", function(err){ 
+					// if(err) throw err;
+					// console.log('fin du traitement ...');
+					// console.log('on a creer le fichier temporaire tmpFichier'); // pour dire qu'on peut lire librement dans la databaseEntreprises ( voir fonction readALL de databaseEntreprises)
 					server.nbr=0;
-					});
+					// });
 	}
 };
 
@@ -156,8 +156,8 @@ server.compare = function(output, data, vecteur_semaine, vecteur_jour, num_entre
 
 event.on("enregistrement", function(cac_40){
 
-	fs.writeFile("../protected/cac_40.json", JSON.stringify(cac_40), 'utf8', 'a+', function(err){
-		if(err) throw err;
+	fs.writeFile("../protected/cac_40.json", JSON.stringify(cac_40), 'utf8', function(err){
+		if(err) util.log( err);
 		console.log('we just saved the buffer in a file');
 		server.calcul(server.nbr++);
 		}); 
@@ -168,17 +168,17 @@ event.on("enregistrement", function(cac_40){
 
 exports.traitement=function()
 {
-fs.exists('../protected/tmpFichier.json', function (exist) {
-    if (exist) {
-			fs.unlinkSync('../protected/tmpFichier.json') // on supprime le fichier temporaire 
-			console.log('successfull delete OF /tmpFichier');
+// fs.exists('../protected/tmpFichier.json', function (exist) {
+    // if (exist) {
+			// fs.unlinkSync('../protected/tmpFichier.json') // on supprime le fichier temporaire 
+			// console.log('successfull delete OF /tmpFichier');
 			server.calcul(server.nbr++);
-    } else {
-			console.log("le fichier n'existe pas encore");
-			server.calcul(server.nbr++);	
+    // } else {
+			// console.log("le fichier n'existe pas encore");
+			// server.calcul(server.nbr++);	
 			
-		}
-	});
+		// }
+	// });
 	
 }
 // exports.traitement();

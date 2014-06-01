@@ -3,11 +3,11 @@ var database = require('./database.js');
 var lecture_articles = require('./lecture_articles.js');
 var databaseChiffre = require('./databaseChiffre.js');
 var databaseEntreprises = require('./databaseEntreprises.js');
-var logique = require('./logique.js');
+var logique = require('./newlogique.js');
 var portefeuille = require('./portefeuille.js');
 
 exports.postReq = function(paquets, req, resp) {
-	// util.log("Reception paquets : " + util.inspect(paquets));
+	util.log("Reception paquets : " + util.inspect(paquets));
 	var traitement_post = new constr_post_acceuil(paquets, req, resp);
 	
 	if (paquets.act == "identification") {
