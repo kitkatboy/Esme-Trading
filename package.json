@@ -1,0 +1,22 @@
+{
+  "name": "Esme-Trading",
+  "version": "1.0.0",
+  "description": "Trading helper tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kitkatboy/Esme-Trading.git"
+  },
+  "author": "kitkatboy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kitkatboy/Esme-Trading/issues"
+  },
+  "homepage": "https://github.com/kitkatboy/Esme-Trading",
+  "dependencies": {
+    "sqlite3": "^3.0.8"
+  }
+}
