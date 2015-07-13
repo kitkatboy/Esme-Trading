@@ -1,3 +1,7 @@
 # ignored directories
 .idea/
 node_modules/
+
+# ignored files
+portefeuille*
+database.db
